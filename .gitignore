@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Node / React Native
+node_modules/
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+*.apk
+*.ipa
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Large research raw data (keep code/plots tracked, share big CSVs separately)
+backend/research/**/congestie_pc6.csv
+backend/research/data/Netherlands.csv
+backend/research/more_data/dataset7/european_wholesale_electricity_price_data_daily.csv
+# Weather Parquet/CSV cache built by weather_pipeline/fetch_weather_data.py
+backend/research/**/weather_netherlands_*.parquet
+backend/research/**/weather_netherlands_*.csv
