@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV Catalogue — SmartEV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent:#16A34A; --accent2:#2563EB;
+      --accent-light:rgba(22,163,74,.08); --accent2-light:rgba(37,99,235,.08);
+      --bg:#F8FAFF; --bg2:#FFFFFF; --bg3:#EEF2FA;
+      --border:rgba(0,0,0,0.07); --border-b:rgba(0,0,0,0.13);
+      --text:#111827; --tm:#4B5563; --td:#9CA3AF;
+      --sh:0 1px 3px rgba(0,0,0,0.06),0 2px 8px rgba(0,0,0,0.06);
+      --shm:0 4px 16px rgba(0,0,0,0.09);
+      --r:12px;
+    }
+    [data-theme="dark"] {
+      --accent:#22D3A5; --accent2:#60A5FA;
+      --accent-light:rgba(34,211,165,.08); --accent2-light:rgba(96,165,250,.08);
+      --bg:#060B16; --bg2:#0D1726; --bg3:#111E30;
+      --border:rgba(255,255,255,0.07); --border-b:rgba(255,255,255,0.13);
+      --text:#F0F4FF; --tm:#7C8FA8; --td:#4A5568;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+    /* ── NAV ── */
+    .nav{position:sticky;top:0;z-index:50;background:rgba(248,250,255,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 24px}
+    [data-theme="dark"] .nav{background:rgba(6,11,22,.9)}
+    .nav-i{display:flex;align-items:center;height:64px;gap:12px;max-width:1200px;margin:0 auto}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--text);text-decoration:none}
+    .nav-mark{width:32px;height:32px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .theme-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border-b);background:var(--bg2);color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .theme-btn:hover{background:var(--bg3)}
+    .icon-sun,.icon-moon{display:none}
+    [data-theme="light"] .icon-moon{display:block}
+    [data-theme="dark"] .icon-sun{display:block}
+    .btn-s{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9px;border:1px solid var(--border-b);background:var(--bg2);color:var(--text);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .15s}
+    .btn-s:hover{background:var(--bg3)}
+    .btn-p{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity .15s}
+    .btn-p:hover{opacity:.88}
+
+    /* ── PAGE ── */
+    .container{max-width:1200px;margin:0 auto;padding:0 24px}
+    .page-hdr{padding:48px 0 32px}
+    .page-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:4px 12px;border-radius:100px;margin-bottom:14px}
+    .page-hdr h1{font-size:clamp(26px,3.5vw,38px);font-weight:800;letter-spacing:-.03em;margin-bottom:10px}
+    .page-hdr p{font-size:16px;color:var(--tm);max-width:540px}
+
+    /* ── CONTROLS ── */
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:28px;background:var(--bg2);padding:16px 20px;border-radius:var(--r);border:1px solid var(--border)}
+    .search-wrap{position:relative;flex:1;min-width:180px}
+    .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--td);pointer-events:none}
+    .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px 9px 36px;font-family:inherit;font-size:14px;color:var(--text);transition:border-color .15s}
+    .search-input:focus{outline:none;border-color:var(--accent)}
+    .search-input::placeholder{color:var(--td)}
+    .filter-select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:inherit;font-size:14px;color:var(--text);cursor:pointer;transition:border-color .15s}
+    .filter-select:focus{outline:none;border-color:var(--accent)}
+    .filter-select option{background:var(--bg2)}
+    .count-label{font-size:13px;color:var(--td);margin-left:auto;white-space:nowrap}
+
+    /* ── GRID ── */
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:60px}
+    .car-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s,box-shadow .2s,transform .2s}
+    .car-card:hover{border-color:var(--accent);box-shadow:var(--shm);transform:translateY(-2px)}
+    .car-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light),var(--shm)}
+
+    /* image area */
+    .car-img-wrap{background:var(--bg3);height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer}
+    .car-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+    .car-img-wrap:hover img{transform:scale(1.04)}
+    .car-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg3)}
+    .car-img-placeholder svg{opacity:.28;color:var(--tm)}
+    .car-brand-badge{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:rgba(248,250,255,.92);backdrop-filter:blur(6px);padding:3px 8px;border-radius:6px;z-index:2}
+    [data-theme="dark"] .car-brand-badge{background:rgba(13,23,38,.88)}
+    .car-year-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:600;color:var(--td);background:rgba(248,250,255,.92);backdrop-filter:blur(6px);border:1px solid var(--border);padding:3px 7px;border-radius:6px;z-index:2}
+    [data-theme="dark"] .car-year-badge{background:rgba(13,23,38,.88)}
+    .car-view-hint{position:absolute;bottom:8px;right:8px;font-size:10px;font-weight:600;color:#fff;background:rgba(0,0,0,.48);padding:3px 8px;border-radius:5px;opacity:0;transition:opacity .2s;z-index:2;pointer-events:none}
+    .car-img-wrap:hover .car-view-hint{opacity:1}
+
+    .car-body{padding:16px 18px 20px}
+    .car-name{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.3;cursor:pointer}
+    .car-name:hover{color:var(--accent)}
+    .car-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+    .car-stat{background:var(--bg3);border-radius:8px;padding:8px 10px}
+    .car-stat-v{font-size:16px;font-weight:700;color:var(--text)}
+    .car-stat-l{font-size:10px;color:var(--td);margin-top:2px;font-weight:500}
+    .car-stat-v.green{color:var(--accent)}
+    .car-stat-v.blue{color:var(--accent2)}
+    .car-features{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+    .car-chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--bg3);color:var(--tm)}
+    .car-chip.green{background:var(--accent-light);color:var(--accent)}
+    .car-chip.blue{background:var(--accent2-light);color:var(--accent2)}
+    .car-price{font-size:13px;color:var(--td);margin-bottom:12px}
+    .car-price strong{color:var(--text);font-size:14px}
+    .car-actions{display:flex;gap:8px}
+    .car-detail-btn{flex:0 0 auto;background:var(--bg3);border:1px solid var(--border-b);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:12px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s,color .15s;display:flex;align-items:center;gap:5px}
+    .car-detail-btn:hover{background:var(--accent2-light);color:var(--accent2);border-color:var(--accent2)}
+    .car-add-btn{flex:1;background:var(--bg3);border:1px solid var(--border-b);border-radius:8px;padding:9px 10px;font-family:inherit;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s,color .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .car-add-btn:hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+    .car-add-btn.added{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+
+    /* ── EMPTY STATE ── */
+    .empty{text-align:center;padding:64px 20px;color:var(--td)}
+    .empty svg{opacity:.3;margin:0 auto 16px}
+    .empty p{font-size:15px}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:var(--bg);padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;z-index:1000;transition:transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ── DETAIL PANEL ── */
+    .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+    .panel-overlay.open{opacity:1;pointer-events:all}
+    .detail-panel{position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);background:var(--bg2);z-index:201;overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+    .detail-panel.open{transform:translateX(0)}
+
+    .dp-img-wrap{width:100%;height:220px;background:var(--bg3);position:relative;overflow:hidden}
+    .dp-img-wrap img{width:100%;height:100%;object-fit:cover}
+    .dp-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+    .dp-img-placeholder svg{opacity:.22;color:var(--tm)}
+    .dp-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:8px;background:rgba(0,0,0,.45);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;transition:background .15s}
+    .dp-close:hover{background:rgba(0,0,0,.65)}
+    .dp-brand-pill{position:absolute;bottom:14px;left:14px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:rgba(248,250,255,.92);backdrop-filter:blur(6px);padding:4px 10px;border-radius:7px;z-index:3}
+    [data-theme="dark"] .dp-brand-pill{background:rgba(13,23,38,.88)}
+
+    .dp-body{padding:24px}
+    .dp-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+    .dp-meta{font-size:13px;color:var(--td);margin-bottom:20px}
+
+    .dp-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .dp-spec{background:var(--bg3);border-radius:10px;padding:12px 14px}
+    .dp-spec-v{font-size:20px;font-weight:800;letter-spacing:-.02em}
+    .dp-spec-v.green{color:var(--accent)}
+    .dp-spec-v.blue{color:var(--accent2)}
+    .dp-spec-l{font-size:11px;color:var(--td);margin-top:3px;font-weight:500}
+
+    .dp-section{margin-bottom:20px}
+    .dp-section-title{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--td);margin-bottom:10px}
+    .dp-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .dp-chip{font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--bg3);color:var(--tm)}
+    .dp-chip.green{background:var(--accent-light);color:var(--accent)}
+    .dp-chip.blue{background:var(--accent2-light);color:var(--accent2)}
+
+    /* charging time table */
+    .charge-table{width:100%;border-collapse:collapse;font-size:13px}
+    .charge-table th{text-align:left;font-weight:600;color:var(--td);font-size:11px;padding:6px 8px 6px 0;border-bottom:1px solid var(--border)}
+    .charge-table td{padding:7px 8px 7px 0;border-bottom:1px solid var(--border);color:var(--text)}
+    .charge-table tr:last-child td{border-bottom:none}
+    .charge-table .t-speed{font-weight:700;color:var(--accent2)}
+    .charge-table .t-time{font-weight:600}
+
+    /* CACCS savings estimate */
+    .savings-bar{background:var(--bg3);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px}
+    .sb-icon{width:38px;height:38px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0}
+    .sb-text{flex:1}
+    .sb-val{font-size:19px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+    .sb-lbl{font-size:11px;color:var(--td);margin-top:2px}
+
+    .dp-cta{display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+    .dp-cta-add{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+    .dp-cta-add:hover{opacity:.88}
+    .dp-cta-add.added{background:var(--accent-light);color:var(--accent)}
+    .dp-cta-login{flex:1;background:var(--bg3);color:var(--text);border:1px solid var(--border-b);border-radius:10px;padding:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+    .dp-cta-login:hover{background:var(--accent2-light);color:var(--accent2)}
+
+    .dp-desc{font-size:14px;color:var(--tm);line-height:1.65;padding:14px 16px;background:var(--bg3);border-radius:10px;margin-bottom:20px}
+
+    @media(max-width:640px){
+      .controls{flex-direction:column;align-items:stretch}
+      .count-label{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-i">
+    <a href="/" class="nav-logo">
+      <div class="nav-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg></div>
+      SmartEV
+    </a>
+    <div class="nav-right">
+      <button class="theme-btn" id="theme-toggle">
+        <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <a href="/" class="btn-s">Home</a>
+      <a href="/dashboard" class="btn-p" id="dash-btn" style="display:none">Go to dashboard</a>
+      <a href="/register" class="btn-p" id="reg-btn">Get started free</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-hdr">
+    <div class="page-badge">EV Catalogue 2025</div>
+    <h1>20 Dutch top-selling electric vehicles</h1>
+    <p>Every model in our catalogue — with battery specs, WLTP range, and CACCS-compatible charging data. Click any car to see full details, charging times, and estimated smart-charging savings.</p>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="search-input" id="search" placeholder="Search model or brand…" oninput="filterCars()">
+    </div>
+    <select class="filter-select" id="brand-filter" onchange="filterCars()">
+      <option value="">All brands</option>
+    </select>
+    <select class="filter-select" id="sort-by" onchange="filterCars()">
+      <option value="range">Sort: Best range</option>
+      <option value="battery">Sort: Largest battery</option>
+      <option value="efficiency">Sort: Most efficient</option>
+      <option value="power">Sort: AC power</option>
+      <option value="price">Sort: Lowest price</option>
+    </select>
+    <span class="count-label" id="count-label">Loading…</span>
+  </div>
+
+  <div class="cat-grid" id="car-grid"></div>
+</div>
+
+<!-- Panel overlay -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+
+<!-- Detail panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-img-wrap" id="dp-img-wrap">
+    <div class="dp-img-placeholder" id="dp-img-placeholder">
+      <svg width="80" height="80" viewBox="0 0 64 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="14" width="56" height="14" rx="4"/><path d="M10 14 L16 6 H48 L54 14"/>
+        <circle cx="16" cy="28" r="4"/><circle cx="48" cy="28" r="4"/>
+      </svg>
+    </div>
+    <button class="dp-close" onclick="closePanel()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="dp-brand-pill" id="dp-brand-pill"></div>
+  </div>
+  <div class="dp-body">
+    <div class="dp-title" id="dp-title"></div>
+    <div class="dp-meta" id="dp-meta"></div>
+    <div class="dp-desc" id="dp-desc"></div>
+    <div class="dp-specs" id="dp-specs"></div>
+    <div class="dp-section">
+      <div class="dp-section-title">Charging capability</div>
+      <div class="dp-chips" id="dp-chips"></div>
+    </div>
+    <div class="dp-section">
+      <div class="dp-section-title">Estimated charging times</div>
+      <table class="charge-table" id="dp-charge-table">
+        <thead><tr><th>Charger speed</th><th>0 → 80%</th><th>0 → 100%</th></tr></thead>
+        <tbody id="dp-charge-body"></tbody>
+      </table>
+    </div>
+    <div class="dp-section">
+      <div class="dp-section-title">Smart charging benefit</div>
+      <div class="savings-bar">
+        <div class="sb-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
+        </div>
+        <div class="sb-text">
+          <div class="sb-val" id="dp-savings"></div>
+          <div class="sb-lbl">estimated annual saving vs. uncontrolled charging (typical NL tariff)</div>
+        </div>
+      </div>
+    </div>
+    <div class="dp-cta" id="dp-cta"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){ const t=localStorage.getItem("theme")||"light"; document.documentElement.setAttribute("data-theme",t); })();
+document.getElementById("theme-toggle").addEventListener("click",()=>{
+  const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",n); localStorage.setItem("theme",n);
+});
+if (localStorage.getItem("token")) {
+  document.getElementById("dash-btn").style.display = "inline-flex";
+  document.getElementById("reg-btn").style.display = "none";
+}
+
+/* ── Wikipedia image cache ── */
+const WIKI_TITLES = {
+  "Tesla Model Y":          "Tesla_Model_Y",
+  "Tesla Model 3":          "Tesla_Model_3",
+  "Volkswagen ID.4":        "Volkswagen_ID.4",
+  "Volkswagen ID.3":        "Volkswagen_ID.3",
+  "Skoda Enyaq":            "%C5%A0koda_Enyaq",
+  "Audi Q4 e-tron":         "Audi_Q4_e-tron",
+  "BMW iX1":                "BMW_iX1",
+  "BMW iX3":                "BMW_iX3",
+  "Peugeot e-208":          "Peugeot_e-208",
+  "Peugeot e-2008":         "Peugeot_e-2008",
+  "Renault Zoe":            "Renault_Zoe",
+  "Renault Megane E-Tech":  "Renault_Megane_E-Tech_Electric",
+  "Hyundai Ioniq 5":        "Hyundai_IONIQ_5",
+  "Hyundai Ioniq 6":        "Hyundai_IONIQ_6",
+  "Kia EV6":                "Kia_EV6",
+  "Kia Niro EV":            "Kia_Niro_EV",
+  "Mercedes EQA":           "Mercedes-Benz_EQA",
+  "Volvo EX40":             "Volvo_EX40",
+  "Opel Astra Electric":    "Opel_Astra_Electric",
+  "Fiat 500e":              "Fiat_500_(2020)",
+};
+
+const _imgCache = {};
+async function fetchCarImage(modelName) {
+  if (_imgCache[modelName] !== undefined) return _imgCache[modelName];
+  try {
+    const title = WIKI_TITLES[modelName] || encodeURIComponent(modelName.replace(/ /g,"_"));
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`,
+      { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) { _imgCache[modelName] = ""; return ""; }
+    const d = await r.json();
+    _imgCache[modelName] = d.thumbnail?.source || "";
+  } catch { _imgCache[modelName] = ""; }
+  return _imgCache[modelName];
+}
+
+/* ── Car descriptions ── */
+const CAR_DESCRIPTIONS = {
+  "Tesla Model Y":         "The best-selling EV in the Netherlands. The Model Y Performance variant can accelerate 0–100 km/h in 3.7 s and features Tesla's proprietary Supercharger network for rapid DC top-ups on the road.",
+  "Tesla Model 3":         "Tesla's compact executive saloon delivers a premium interior, over-the-air software updates, and access to the world's largest fast-charging network. Frequently cited for the lowest real-world energy consumption in its class.",
+  "Volkswagen ID.4":       "Volkswagen's mid-size SUV on the MEB electric platform. Well-balanced range and practicality made it one of Europe's top-selling EVs. Supports CCS DC charging at up to 135 kW.",
+  "Volkswagen ID.3":       "The car that kicked off VW's electric era — a compact hatchback sized like a Golf but with more interior space. Very popular in city fleets across the Netherlands.",
+  "Skoda Enyaq":           "Built on the same MEB platform as the ID.4 but with more passenger space and a premium feel at a lower price. Czech engineering and Skoda's practical design philosophy shine here.",
+  "Audi Q4 e-tron":        "Premium compact SUV with near-silent interior and Audi's Virtual Cockpit. Shares its platform with the ID.4 but adds Audi-level refinement. Qualifies for ERE certificate programs in NL.",
+  "BMW iX1":               "BMW's entry-level electric SAV uses a 5th-generation eDrive system offering a well-balanced blend of efficiency, handling, and interior quality typical of the BMW brand.",
+  "BMW iX3":               "The iX3 packs BMW performance in a practical mid-size SUV. Its 80 kWh battery and up to 286 hp make it a compelling option for drivers covering long daily distances.",
+  "Peugeot e-208":         "Award-winning urban EV. The Peugeot e-208 won the Car of the Year title for good reason — sharp styling, a 3D instrument cluster, and city-optimised efficiency in a supermini package.",
+  "Peugeot e-2008":        "The SUV sibling to the e-208 adds more luggage space and a higher seating position while keeping the same efficient powertrain. Popular for young families in the Netherlands.",
+  "Renault Zoe":           "One of Europe's most popular EVs by total sales volume. The Zoe is optimised for urban use with excellent energy recovery in stop-start traffic. Supports optional CHP battery replacement.",
+  "Renault Megane E-Tech": "Renault's modern EV platform delivers a low-slung, stylish design with up to 300 km WLTP range and 130 kW DC charging capability.",
+  "Hyundai Ioniq 5":       "Winner of multiple international Car of the Year awards, the Ioniq 5 features 800V architecture for ultra-rapid 220 kW charging — charging from 10–80% in under 18 minutes.",
+  "Hyundai Ioniq 6":       "Hyundai's aerodynamic saloon achieves one of the best drag coefficients of any production EV (Cd 0.21), boosting real-world range. Also supports 800V charging.",
+  "Kia EV6":               "Kia's GT-Line Award winner. Built on the same 800V E-GMP platform as the Ioniq 5 and praised for its GT performance version producing 577 hp in AWD configuration.",
+  "Kia Niro EV":           "A practical crossover-style EV with generous standard specification and a focus on comfort over outright performance. Great choice for mixed urban and motorway driving.",
+  "Mercedes EQA":          "The EQA brings Mercedes-Benz interior quality and the MBUX infotainment system to the compact EV segment. A refined, premium choice for urban and suburban drivers.",
+  "Volvo EX40":            "Formerly the XC40 Recharge, the EX40 inherits Volvo's renowned safety record and clean Scandinavian interior design. The single-motor variant offers excellent range for the battery size.",
+  "Opel Astra Electric":   "A well-rounded compact family car offering 416 km of range. Based on the Stellantis e-CMP platform and attractively priced compared to premium rivals.",
+  "Fiat 500e":             "The iconic 500 reimagined as a pure electric city car. Tiny dimensions, playful styling, and excellent maneuverability make it the perfect urban commuter for Dutch city centres.",
+};
+
+const API = "";
+let ALL_CARS = [];
+let myVehicles = new Set();
+let _panelCar = null;
+
+const CAR_SVG_SMALL = `<svg width="64" height="40" viewBox="0 0 64 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.28;color:var(--tm)">
+  <rect x="4" y="14" width="56" height="14" rx="4"/>
+  <path d="M10 14 L16 6 H48 L54 14"/>
+  <circle cx="16" cy="28" r="4"/>
+  <circle cx="48" cy="28" r="4"/>
+</svg>`;
+
+async function loadCars() {
+  try {
+    const res = await fetch(`${API}/api/vehicles/catalog`);
+    const { vehicles } = await res.json();
+    ALL_CARS = vehicles;
+
+    const brands = [...new Set(vehicles.map(v => v.brand))].sort();
+    const sel = document.getElementById("brand-filter");
+    brands.forEach(b => {
+      const opt = document.createElement("option");
+      opt.value = b; opt.textContent = b;
+      sel.appendChild(opt);
+    });
+
+    if (localStorage.getItem("token")) {
+      try {
+        const vRes = await fetch(`${API}/api/vehicles`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        });
+        if (vRes.ok) { const vData = await vRes.json(); vData.forEach(v => myVehicles.add(v.model_name)); }
+      } catch {}
+    }
+
+    filterCars();
+  } catch {
+    document.getElementById("car-grid").innerHTML = `<div class="empty"><p>Could not load catalogue. Make sure the server is running.</p></div>`;
+  }
+}
+
+function filterCars() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const brand = document.getElementById("brand-filter").value;
+  const sort = document.getElementById("sort-by").value;
+
+  let cars = ALL_CARS.filter(c => {
+    const matchQ = !q || c.model_name.toLowerCase().includes(q) || c.brand.toLowerCase().includes(q);
+    const matchB = !brand || c.brand === brand;
+    return matchQ && matchB;
+  });
+
+  const sortFns = {
+    range:      (a,b) => b.wltp_km - a.wltp_km,
+    battery:    (a,b) => b.battery_kwh - a.battery_kwh,
+    efficiency: (a,b) => a.efficiency_kwh_100km - b.efficiency_kwh_100km,
+    power:      (a,b) => b.ac_power_kw - a.ac_power_kw,
+    price:      (a,b) => a.price_eur - b.price_eur,
+  };
+  cars.sort(sortFns[sort]);
+
+  renderCars(cars);
+  document.getElementById("count-label").textContent = `${cars.length} of ${ALL_CARS.length} models`;
+}
+
+function chargingTimeStr(battKwh, powerKw, targetPct) {
+  const hrs = (battKwh * targetPct / 100) / (powerKw * 0.92);
+  if (hrs < 1) return `${Math.round(hrs * 60)} min`;
+  const h = Math.floor(hrs), m = Math.round((hrs - h) * 60);
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
+function renderCars(cars) {
+  const grid = document.getElementById("car-grid");
+  if (!cars.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <p>No vehicles match your search.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = cars.map(c => {
+    const isAdded = myVehicles.has(c.model_name);
+    const powerChip = c.ac_power_kw >= 22
+      ? `<span class="car-chip green">22 kW 3-phase</span>`
+      : c.ac_power_kw >= 11
+        ? `<span class="car-chip blue">11 kW</span>`
+        : `<span class="car-chip">7.4 kW</span>`;
+    const rangeChip = c.wltp_km >= 600
+      ? `<span class="car-chip green">600+ km</span>`
+      : c.wltp_km >= 500 ? `<span class="car-chip blue">500+ km</span>` : ``;
+
+    const safeJson = JSON.stringify(c).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+
+    const addBtn = localStorage.getItem("token")
+      ? `<button class="car-add-btn ${isAdded ? 'added' : ''}" id="add-${c.id}"
+           onclick="event.stopPropagation();addToGarage(this,${c.id})">
+           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+             ${isAdded ? '<path d="M20 6L9 17l-5-5"/>' : '<path d="M12 5v14M5 12h14"/>'}
+           </svg>${isAdded ? 'In garage' : 'Add to garage'}
+         </button>`
+      : `<a href="/register" class="car-add-btn" style="text-decoration:none" onclick="event.stopPropagation()">
+           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Register to add
+         </a>`;
+
+    return `<div class="car-card" id="card-${c.id}" onclick="openPanel(${c.id})">
+      <div class="car-img-wrap" data-model="${c.model_name.replace(/"/g,'&quot;')}" id="img-${c.id}">
+        ${CAR_SVG_SMALL}
+        <div class="car-brand-badge">${c.brand}</div>
+        <div class="car-year-badge">${c.year}</div>
+        <div class="car-view-hint">View details</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name" onclick="openPanel(${c.id})">${c.model_name}</div>
+        <div class="car-stats">
+          <div class="car-stat"><div class="car-stat-v green">${c.wltp_km}</div><div class="car-stat-l">WLTP km</div></div>
+          <div class="car-stat"><div class="car-stat-v blue">${c.battery_kwh}</div><div class="car-stat-l">kWh battery</div></div>
+          <div class="car-stat"><div class="car-stat-v">${c.efficiency_kwh_100km}</div><div class="car-stat-l">kWh/100 km</div></div>
+          <div class="car-stat"><div class="car-stat-v">${c.ac_power_kw}</div><div class="car-stat-l">kW AC max</div></div>
+        </div>
+        <div class="car-features">${powerChip}${rangeChip}</div>
+        <div class="car-price">From <strong>€${c.price_eur ? c.price_eur.toLocaleString('nl-NL') : '–'}</strong></div>
+        <div class="car-actions">
+          <button class="car-detail-btn" onclick="event.stopPropagation();openPanel(${c.id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            Details
+          </button>
+          ${addBtn}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Lazy-load images after render
+  cars.forEach(c => loadCardImage(c));
+}
+
+async function loadCardImage(c) {
+  const wrap = document.getElementById(`img-${c.id}`);
+  if (!wrap) return;
+  const src = await fetchCarImage(c.model_name);
+  if (!src) return;
+  const oldSvg = wrap.querySelector("svg");
+  if (oldSvg) oldSvg.remove();
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = c.model_name;
+  img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+  wrap.style.position = "relative";
+  wrap.insertBefore(img, wrap.firstChild);
+}
+
+/* ── Detail Panel ── */
+async function openPanel(carId) {
+  const c = ALL_CARS.find(x => x.id === carId);
+  if (!c) return;
+  _panelCar = c;
+
+  // Image
+  const imgWrap = document.getElementById("dp-img-wrap");
+  const placeholder = document.getElementById("dp-img-placeholder");
+  const existingImg = imgWrap.querySelector("img");
+  if (existingImg) existingImg.remove();
+  placeholder.style.display = "flex";
+
+  // Brand pill
+  document.getElementById("dp-brand-pill").textContent = c.brand;
+
+  // Title + meta
+  document.getElementById("dp-title").textContent = c.model_name;
+  document.getElementById("dp-meta").textContent = `${c.year} · ${c.brand} · ${c.ac_power_kw} kW AC max`;
+
+  // Description
+  const desc = CAR_DESCRIPTIONS[c.model_name] || `The ${c.model_name} is part of SmartEV's 2025 Dutch EV catalogue. It features a ${c.battery_kwh} kWh battery and WLTP-rated range of ${c.wltp_km} km.`;
+  document.getElementById("dp-desc").textContent = desc;
+
+  // Specs
+  const effGrade = c.efficiency_kwh_100km <= 15 ? "green" : c.efficiency_kwh_100km <= 18 ? "blue" : "";
+  document.getElementById("dp-specs").innerHTML = `
+    <div class="dp-spec"><div class="dp-spec-v green">${c.wltp_km} km</div><div class="dp-spec-l">WLTP range</div></div>
+    <div class="dp-spec"><div class="dp-spec-v blue">${c.battery_kwh} kWh</div><div class="dp-spec-l">Battery capacity</div></div>
+    <div class="dp-spec"><div class="dp-spec-v ${effGrade}">${c.efficiency_kwh_100km} kWh</div><div class="dp-spec-l">per 100 km</div></div>
+    <div class="dp-spec"><div class="dp-spec-v">${c.ac_power_kw} kW</div><div class="dp-spec-l">Max AC charge rate</div></div>
+  `;
+
+  // Feature chips
+  const chips = [];
+  if (c.ac_power_kw >= 22)      chips.push('<span class="dp-chip green">22 kW 3-phase AC</span>');
+  else if (c.ac_power_kw >= 11) chips.push('<span class="dp-chip blue">11 kW 3-phase AC</span>');
+  else                          chips.push('<span class="dp-chip">7.4 kW 1-phase AC</span>');
+  if (c.wltp_km >= 600)         chips.push('<span class="dp-chip green">600+ km range</span>');
+  else if (c.wltp_km >= 500)    chips.push('<span class="dp-chip blue">500+ km range</span>');
+  if (c.efficiency_kwh_100km <= 15) chips.push('<span class="dp-chip green">Efficiency A+</span>');
+  else if (c.efficiency_kwh_100km <= 17) chips.push('<span class="dp-chip blue">Efficiency A</span>');
+  chips.push('<span class="dp-chip">CCS DC compatible</span>');
+  chips.push('<span class="dp-chip">CACCS compatible</span>');
+  document.getElementById("dp-chips").innerHTML = chips.join("");
+
+  // Charging time table
+  const speeds = [
+    { label: "3.7 kW (home socket)", kw: 3.7 },
+    { label: "7.4 kW (wallbox)", kw: 7.4 },
+    { label: "11 kW (3-phase)", kw: 11 },
+    { label: "22 kW (fast wallbox)", kw: 22 },
+  ];
+  const cap = Math.min(c.ac_power_kw, 22);
+  document.getElementById("dp-charge-body").innerHTML = speeds.map(s => {
+    const usable = Math.min(s.kw, cap);
+    const cls = s.kw > cap ? ' style="opacity:.4"' : '';
+    const note = s.kw > cap ? ` <span style="font-size:10px;color:var(--td)">(limited to ${cap} kW)</span>` : '';
+    return `<tr${cls}>
+      <td class="t-speed">${s.label}${note}</td>
+      <td class="t-time">${chargingTimeStr(c.battery_kwh, usable, 80)}</td>
+      <td class="t-time">${chargingTimeStr(c.battery_kwh, usable, 100)}</td>
+    </tr>`;
+  }).join("");
+
+  // CACCS savings estimate: ~15% saving on typical NL tariff
+  const annualKwh = (c.efficiency_kwh_100km / 100) * 15000; // 15 000 km/year
+  const savingEur = annualKwh * 0.082; // ERE + smart benefit ~8.2 ct/kWh
+  document.getElementById("dp-savings").textContent = `€${savingEur.toFixed(0)} / year`;
+
+  // CTA buttons
+  const isAdded = myVehicles.has(c.model_name);
+  if (localStorage.getItem("token")) {
+    document.getElementById("dp-cta").innerHTML = `
+      <button class="dp-cta-add ${isAdded ? 'added' : ''}" id="dp-add-btn" onclick="addToGarageFromPanel(${c.id})">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          ${isAdded ? '<path d="M20 6L9 17l-5-5"/>' : '<path d="M12 5v14M5 12h14"/>'}
+        </svg>
+        ${isAdded ? 'Already in your garage' : 'Add to my garage'}
+      </button>`;
+  } else {
+    document.getElementById("dp-cta").innerHTML = `
+      <a href="/register" class="dp-cta-login">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Register — it's free
+      </a>
+      <a href="/login" class="dp-cta-login" style="flex:.5">Sign in</a>`;
+  }
+
+  // Open panel
+  document.getElementById("panel-overlay").classList.add("open");
+  document.getElementById("detail-panel").classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  // Load image async
+  fetchCarImage(c.model_name).then(src => {
+    if (!src) return;
+    const existing = imgWrap.querySelector("img");
+    if (existing) existing.remove();
+    placeholder.style.display = "none";
+    const img = document.createElement("img");
+    img.src = src; img.alt = c.model_name;
+    imgWrap.insertBefore(img, placeholder);
+  });
+}
+
+function closePanel() {
+  document.getElementById("panel-overlay").classList.remove("open");
+  document.getElementById("detail-panel").classList.remove("open");
+  document.body.style.overflow = "";
+  _panelCar = null;
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+
+/* ── Add to garage ── */
+async function addToGarage(btn, carId) {
+  const c = ALL_CARS.find(x => x.id === carId);
+  if (!c || myVehicles.has(c.model_name)) return;
+  const token = localStorage.getItem("token");
+  if (!token) { window.location.href = "/register"; return; }
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/vehicles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({
+        model_name: c.model_name,
+        brand: c.brand,
+        year: c.year,
+        battery_kwh: c.battery_kwh,
+        wltp_km: c.wltp_km,
+        ac_power_kw: c.ac_power_kw,
+        efficiency_kwh_100km: c.efficiency_kwh_100km,
+        is_default: myVehicles.size === 0,
+      }),
+    });
+    if (!res.ok) throw new Error();
+    myVehicles.add(c.model_name);
+    btn.classList.add("added");
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>In garage`;
+    showToast(`${c.model_name} added to your garage`);
+  } catch {
+    showToast("Could not add vehicle — please try again");
+  }
+  btn.disabled = false;
+}
+
+async function addToGarageFromPanel(carId) {
+  const c = ALL_CARS.find(x => x.id === carId);
+  if (!c || myVehicles.has(c.model_name)) return;
+  const token = localStorage.getItem("token");
+  if (!token) { window.location.href = "/register"; return; }
+  const btn = document.getElementById("dp-add-btn");
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/vehicles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({
+        model_name: c.model_name, brand: c.brand, year: c.year,
+        battery_kwh: c.battery_kwh, wltp_km: c.wltp_km,
+        ac_power_kw: c.ac_power_kw, efficiency_kwh_100km: c.efficiency_kwh_100km,
+        is_default: myVehicles.size === 0,
+      }),
+    });
+    if (!res.ok) throw new Error();
+    myVehicles.add(c.model_name);
+    if (btn) {
+      btn.classList.add("added");
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Added to garage`;
+    }
+    const cardBtn = document.getElementById(`add-${carId}`);
+    if (cardBtn) {
+      cardBtn.classList.add("added");
+      cardBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>In garage`;
+    }
+    showToast(`${c.model_name} added to your garage`);
+  } catch {
+    showToast("Could not add vehicle — please try again");
+    if (btn) btn.disabled = false;
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+loadCars();
+</script>
+</body>
+</html>

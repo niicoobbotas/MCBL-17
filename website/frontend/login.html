@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — SmartEV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F8FAFF; --bg2: #FFFFFF; --bg3: #EEF2FA;
+      --border: rgba(0,0,0,0.07); --border-bright: rgba(0,0,0,0.13);
+      --green: #16A34A; --text: #111827; --text-muted: #4B5563; --text-dim: #9CA3AF;
+    }
+    [data-theme="dark"] {
+      --bg: #060B16; --bg2: #0D1726; --bg3: #111E30;
+      --border: rgba(255,255,255,0.08); --border-bright: rgba(255,255,255,0.15);
+      --green: #22D3A5; --text: #F0F4FF; --text-muted: #7C8FA8; --text-dim: #4A5568;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+    .auth-side {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 48px;
+      position: relative; overflow: hidden;
+    }
+    .auth-side-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(34,211,165,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,165,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .auth-side-glow {
+      position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 300px;
+      background: radial-gradient(ellipse, rgba(34,211,165,0.12) 0%, transparent 70%);
+    }
+    .auth-side-content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 18px; color: var(--text);
+      text-decoration: none;
+    }
+    .auth-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .auth-side-copy { margin-top: auto; }
+    .auth-side-copy h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 16px; }
+    .auth-side-copy p { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 400px; }
+    .auth-stats { display: flex; gap: 24px; margin-top: 40px; flex-wrap: wrap; }
+    .auth-stat { }
+    .auth-stat-num { font-size: 28px; font-weight: 800; color: var(--green); }
+    .auth-stat-label { font-size: 12px; color: var(--text-muted); }
+
+    .auth-main {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 48px 40px;
+    }
+    .auth-form-container { width: 100%; max-width: 420px; }
+    .auth-form-header { margin-bottom: 32px; }
+    .auth-form-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .auth-form-header p { font-size: 14px; color: var(--text-muted); }
+    .auth-form-header a { color: var(--green); text-decoration: none; }
+    .auth-form-header a:hover { text-decoration: underline; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
+    .form-group input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit; font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    .form-group input::placeholder { color: var(--text-dim); }
+    .form-group input:focus { outline: none; border-color: var(--green); }
+    .form-group input.error { border-color: #F87171; }
+
+    .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; }
+    .checkbox-group input[type="checkbox"] { accent-color: var(--green); cursor: pointer; }
+    .checkbox-group label { font-size: 13px; color: var(--text-muted); cursor: pointer; margin: 0; }
+    .forgot-link { font-size: 13px; color: var(--green); text-decoration: none; }
+    .forgot-link:hover { text-decoration: underline; }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      color: #060B16; border: none; border-radius: 10px;
+      padding: 14px; font-family: inherit; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0; font-size: 12px; color: var(--text-dim);
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ""; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .error-banner {
+      background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 8px; padding: 12px 16px;
+      font-size: 13px; color: #F87171;
+      margin-bottom: 20px; display: none;
+    }
+    .error-banner.visible { display: block; }
+
+    @media (max-width: 768px) {
+      .auth-layout { grid-template-columns: 1fr; }
+      .auth-side { display: none; }
+    }
+    .theme-toggle-btn { position:fixed; top:16px; right:16px; z-index:100; width:36px; height:36px; border-radius:9px; border:1px solid var(--border-bright); background:var(--bg2); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .theme-toggle-btn:hover { background:var(--bg3); }
+    .icon-sun,.icon-moon{display:none}
+    [data-theme="light"] .icon-moon{display:block}
+    [data-theme="dark"] .icon-sun{display:block}
+  </style>
+</head>
+<body>
+<button class="theme-toggle-btn" id="theme-toggle">
+  <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+</button>
+<div class="auth-layout">
+  <div class="auth-side">
+    <div class="auth-side-bg"></div>
+    <div class="auth-side-glow"></div>
+    <div class="auth-side-content">
+      <a href="/" class="auth-logo">
+        <div class="auth-logo-icon">⚡</div>
+        SmartEV
+      </a>
+      <div class="auth-side-copy">
+        <h2>Your EV charges itself at the cheapest hours.</h2>
+        <p>The CACCS algorithm reads today's dynamic Eneco or Essent prices and shifts your charge to the overnight valley — saving you money without lifting a finger.</p>
+        <div class="auth-stats">
+          <div class="auth-stat">
+            <div class="auth-stat-num">€780</div>
+            <div class="auth-stat-label">Max annual savings</div>
+          </div>
+          <div class="auth-stat">
+            <div class="auth-stat-num">54%</div>
+            <div class="auth-stat-label">Peak load reduction</div>
+          </div>
+          <div class="auth-stat">
+            <div class="auth-stat-num">&lt;1ms</div>
+            <div class="auth-stat-label">Schedule computation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-main">
+    <div class="auth-form-container">
+      <div class="auth-form-header">
+        <h1>Welcome back</h1>
+        <p>Don't have an account? <a href="/register">Sign up for free</a></p>
+      </div>
+
+      <div class="error-banner" id="error-banner"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required />
+        </div>
+        <div class="form-options">
+          <div class="checkbox-group">
+            <input type="checkbox" id="remember" checked />
+            <label for="remember">Remember me</label>
+          </div>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn">Sign in</button>
+      </form>
+
+      <div class="auth-divider">or continue with demo</div>
+      <button class="btn-submit" style="background:var(--bg2);border:1px solid var(--border);color:var(--text-muted);" id="demo-btn">
+        🚀 Demo account (demo@evcharger.app)
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){ const t=localStorage.getItem("theme")||"light"; document.documentElement.setAttribute("data-theme",t); })();
+document.getElementById("theme-toggle").addEventListener("click",()=>{ const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",n); localStorage.setItem("theme",n); });
+const API = "";
+
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await doLogin(
+    document.getElementById("email").value,
+    document.getElementById("password").value
+  );
+});
+
+document.getElementById("demo-btn").addEventListener("click", async () => {
+  // Auto-create demo account if not exists, then login
+  try {
+    await fetch(`${API}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "demo@evcharger.app", name: "Andrei", password: "demo2026", supplier: "eneco" }),
+    });
+  } catch {}
+  await doLogin("demo@evcharger.app", "demo2026");
+});
+
+async function doLogin(email, password) {
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Signing in...";
+  const errBanner = document.getElementById("error-banner");
+  errBanner.classList.remove("visible");
+
+  try {
+    const form = new FormData();
+    form.append("username", email);
+    form.append("password", password);
+
+    const res = await fetch(`${API}/api/auth/login`, { method: "POST", body: form });
+    if (!res.ok) {
+      const err = await res.json();
+      const msg = Array.isArray(err.detail)
+        ? err.detail.map(e => e.msg).join('; ')
+        : (err.detail || "Login failed");
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/dashboard";
+  } catch (e) {
+    errBanner.textContent = e.message;
+    errBanner.classList.add("visible");
+    btn.disabled = false; btn.textContent = "Sign in";
+  }
+}
+
+// Redirect if already logged in
+if (localStorage.getItem("token")) window.location.href = "/dashboard";
+</script>
+</body>
+</html>

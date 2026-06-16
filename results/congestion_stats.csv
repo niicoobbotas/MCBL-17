@@ -1,0 +1,8 @@
+,0
+peak_load_MW,24298.992800285716
+trough_load_MW,17544.248484857144
+peak_hour,17.0
+trough_hour,3.0
+peak_to_trough_ratio,1.3850118927156527
+share_ehv_pc6_congestion_code_2_or_3,0.4668054591718714
+share_ehv_pc6_fully_congested,0.15938006014341893

@@ -1,0 +1,10 @@
+,0
+mean_eur_mwh,76.53641802252817
+median_eur_mwh,49.04
+std_eur_mwh,72.85597890051854
+p10_eur_mwh,29.034
+p90_eur_mwh,153.144
+min_eur_mwh,-85.27
+max_eur_mwh,699.75
+coef_var,0.9519125768215817
+share_negative_days,0.001501877346683354

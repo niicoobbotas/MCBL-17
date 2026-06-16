@@ -1,0 +1,7 @@
+supplier,product,type,base_rate_eur_kwh,supplier_margin_eur_kwh,standing_charge_eur_month,notes
+Eneco,Stroom Vast 1 jaar,fixed,0.319,,6.95,12-month price-locked contract
+Eneco,Stroom Vast 3 jaar,fixed,0.348,,6.95,36-month price-locked contract
+Eneco,Dynamische Stroom,dynamic,,0.0235,6.95,Hourly day-ahead + €0.024/kWh supplier margin
+Essent,Vaste Energie 1 jaar,fixed,0.314,,7.1,12-month fixed; usually within €0.005 of Eneco
+Essent,Vaste Energie 3 jaar,fixed,0.342,,7.1,36-month fixed
+Essent,Dynamische Energie,dynamic,,0.022,7.1,Hourly + €0.022/kWh supplier margin

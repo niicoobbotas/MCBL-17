@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create account — SmartEV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F0F6FF; --bg2: #FFFFFF; --bg3: #EEF4FB;
+      --border: rgba(0,0,0,0.08); --border-b: rgba(0,0,0,0.14);
+      --green: #16A34A; --green-bg: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.22);
+      --text: #111827; --muted: #4B5563; --dim: #9CA3AF;
+      --blue: #2563EB; --yellow: #D97706; --red: #DC2626;
+    }
+    [data-theme="dark"] {
+      --bg: #060B16; --bg2: #0D1726; --bg3: #111E30;
+      --border: rgba(255,255,255,0.08); --border-b: rgba(255,255,255,0.14);
+      --green: #22D3A5; --green-bg: rgba(34,211,165,0.08); --green-border: rgba(34,211,165,0.2);
+      --text: #F0F4FF; --muted: #7C8FA8; --dim: #3A4A5C;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── LAYOUT ── */
+    .survey-wrap {
+      max-width: 640px; margin: 0 auto; padding: 24px 20px 60px;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    .survey-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 0 24px; flex-shrink: 0;
+    }
+    .s-logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; text-decoration: none; color: var(--text); }
+    .s-logo-icon { width: 30px; height: 30px; background: linear-gradient(135deg, var(--green), #0EA5E9); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .theme-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 13px; color: var(--muted); }
+    .login-link { font-size: 13px; color: var(--muted); }
+    .login-link a { color: var(--green); font-weight: 600; text-decoration: none; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { margin-bottom: 28px; }
+    .progress-steps { display: flex; align-items: center; gap: 0; margin-bottom: 8px; }
+    .ps-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .ps-circle {
+      width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; background: var(--bg2); color: var(--dim);
+      transition: all 0.3s; flex-shrink: 0;
+    }
+    .ps-step.done .ps-circle { background: var(--green); border-color: var(--green); color: white; }
+    .ps-step.active .ps-circle { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+    .ps-connector { flex: 1; height: 2px; background: var(--border); margin: 0 -1px; transition: background 0.3s; }
+    .ps-connector.done { background: var(--green); }
+    .ps-label { font-size: 10px; color: var(--dim); margin-top: 5px; font-weight: 500; text-align: center; transition: color 0.3s; white-space: nowrap; }
+    .ps-step.active .ps-label, .ps-step.done .ps-label { color: var(--green); }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), #0EA5E9); transition: width 0.4s ease; border-radius: 2px; }
+
+    /* ── STEP CARD ── */
+    .step-card { display: none; animation: stepIn 0.28s ease; }
+    .step-card.active { display: block; }
+    @keyframes stepIn { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:translateX(0)} }
+    .step-heading { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .step-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+
+    /* ── FIELD ── */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; color: var(--text);
+      font-family: inherit; font-size: 14px; transition: border-color 0.2s; outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); }
+    .field select option { background: var(--bg2); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 12px; color: var(--dim); margin-top: 5px; }
+    .field-error { font-size: 12px; color: var(--red); margin-top: 5px; display: none; }
+
+    /* ── PASSWORD STRENGTH ── */
+    .pw-strength { margin-top: 6px; }
+    .pw-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .pw-fill { height: 100%; width: 0; border-radius: 2px; transition: width 0.2s, background 0.2s; }
+    .pw-label { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+    /* ── PROFILE CARDS (step 4) ── */
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 0 16px; }
+    .profile-card {
+      border: 2px solid var(--border); border-radius: 12px; padding: 16px 12px;
+      cursor: pointer; text-align: center; transition: all 0.18s; background: var(--bg2);
+    }
+    .profile-card:hover { border-color: var(--border-b); }
+    .profile-card.active { border-color: var(--green); background: var(--green-bg); }
+    .pc-icon { font-size: 24px; margin-bottom: 6px; }
+    .pc-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .pc-beta { font-size: 11px; color: var(--muted); font-family: monospace; margin-bottom: 5px; }
+    .pc-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+    /* ── VEHICLE PICKER ── */
+    .vehicle-search { margin-bottom: 12px; }
+    .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
+    .vehicle-grid::-webkit-scrollbar { width: 4px; }
+    .vehicle-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .vc-card {
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 12px;
+      cursor: pointer; transition: all 0.18s; background: var(--bg2);
+    }
+    .vc-card:hover { border-color: var(--border-b); }
+    .vc-card.selected { border-color: var(--green); background: var(--green-bg); }
+    .vc-brand { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+    .vc-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; line-height: 1.2; }
+    .vc-stats { display: flex; gap: 8px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+    .no-car-opt {
+      border: 1.5px dashed var(--border); border-radius: 10px; padding: 14px;
+      cursor: pointer; text-align: center; color: var(--muted); font-size: 13px;
+      grid-column: 1/-1; transition: border-color 0.18s;
+    }
+    .no-car-opt:hover { border-color: var(--border-b); }
+    .no-car-opt.selected { border-color: var(--green); color: var(--green); }
+
+    /* ── TOGGLE ── */
+    .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border); }
+    .toggle-row:first-child { border-top: none; padding-top: 0; }
+    .toggle-label { font-size: 14px; font-weight: 500; }
+    .toggle-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .toggle input { display: none; }
+    .toggle-track { position: absolute; inset: 0; border-radius: 12px; background: var(--border); transition: background 0.2s; }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .toggle input:checked ~ .toggle-track { background: var(--green); }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+    /* ── SLIDER ── */
+    .range-row { display: flex; align-items: center; gap: 14px; }
+    .range-val { font-size: 22px; font-weight: 800; min-width: 56px; color: var(--green); }
+    .range-field { flex: 1; }
+    input[type=range] { width: 100%; accent-color: var(--green); }
+
+    /* ── REVIEW ── */
+    .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .review-item { background: var(--bg3); border-radius: 8px; padding: 12px; }
+    .review-key { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+    .review-val { font-size: 14px; font-weight: 600; }
+
+    /* ── TERMS ── */
+    .terms-box { display: flex; gap: 10px; align-items: flex-start; padding: 14px; background: var(--bg3); border-radius: 10px; margin-bottom: 12px; }
+    .terms-box input[type=checkbox] { margin-top: 2px; accent-color: var(--green); flex-shrink: 0; }
+    .terms-box label { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .terms-box a { color: var(--green); font-weight: 500; text-decoration: none; }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-next {
+      flex: 1; padding: 14px;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      color: white; border: none; border-radius: 10px;
+      font-family: inherit; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-next:hover { opacity: 0.88; }
+    .btn-next:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-back {
+      padding: 14px 20px; background: var(--bg3); border: 1.5px solid var(--border);
+      color: var(--text); border-radius: 10px; font-family: inherit; font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-back:hover { background: var(--border); }
+    .err-banner {
+      background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2);
+      color: var(--red); border-radius: 8px; padding: 12px 14px;
+      font-size: 13px; margin-top: 10px; display: none;
+    }
+    .err-banner.show { display: block; }
+
+    @media (max-width: 520px) {
+      .field-row { grid-template-columns: 1fr; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .vehicle-grid { grid-template-columns: 1fr; }
+      .review-grid { grid-template-columns: 1fr; }
+      .progress-steps { gap: 0; }
+      .ps-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="survey-wrap">
+  <!-- Top bar -->
+  <div class="survey-topbar">
+    <a href="/" class="s-logo">
+      <div class="s-logo-icon">⚡</div> SmartEV
+    </a>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="theme-btn" id="theme-toggle">🌙</button>
+      <span class="login-link">Have an account? <a href="/login">Sign in</a></span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-steps" id="progress-steps">
+      <div class="ps-step active" data-step="1">
+        <div class="ps-circle">1</div>
+        <div class="ps-label">Account</div>
+      </div>
+      <div class="ps-connector" data-conn="1"></div>
+      <div class="ps-step" data-step="2">
+        <div class="ps-circle">2</div>
+        <div class="ps-label">Location</div>
+      </div>
+      <div class="ps-connector" data-conn="2"></div>
+      <div class="ps-step" data-step="3">
+        <div class="ps-circle">3</div>
+        <div class="ps-label">Your EV</div>
+      </div>
+      <div class="ps-connector" data-conn="3"></div>
+      <div class="ps-step" data-step="4">
+        <div class="ps-circle">4</div>
+        <div class="ps-label">Habits</div>
+      </div>
+      <div class="ps-connector" data-conn="4"></div>
+      <div class="ps-step" data-step="5">
+        <div class="ps-circle">5</div>
+        <div class="ps-label">Confirm</div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
+  </div>
+
+  <!-- Step 1: Account -->
+  <div class="step-card active" id="step-1">
+    <div class="step-heading">Welcome to SmartEV 👋</div>
+    <div class="step-sub">Let's set up your smart charging account. This takes about 2 minutes.</div>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="s-name" placeholder="Emma de Vries" autocomplete="name" />
+      <div class="field-error" id="err-name">Please enter your name</div>
+    </div>
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="s-email" placeholder="emma@example.nl" autocomplete="email" />
+      <div class="field-error" id="err-email">Please enter a valid email address</div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="s-password" placeholder="Min. 8 characters" autocomplete="new-password" />
+      <div class="pw-strength">
+        <div class="pw-bar"><div class="pw-fill" id="pw-fill"></div></div>
+        <div class="pw-label" id="pw-label">Enter a password</div>
+      </div>
+      <div class="field-error" id="err-password">Password must be at least 8 characters</div>
+    </div>
+    <div class="field">
+      <label>Confirm password</label>
+      <input type="password" id="s-password2" placeholder="Repeat password" autocomplete="new-password" />
+      <div class="field-error" id="err-password2">Passwords do not match</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-next" onclick="goNext(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Location & Supplier -->
+  <div class="step-card" id="step-2">
+    <div class="step-heading">Your home &amp; energy ⚡</div>
+    <div class="step-sub">We use this to personalise your electricity prices and grid analysis for your region.</div>
+    <div class="field">
+      <label>Home address</label>
+      <input type="text" id="s-address" placeholder="Eindhoven, Noord-Brabant" autocomplete="street-address" />
+      <div class="field-hint">Street and city — used for regional grid congestion data</div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Province</label>
+        <select id="s-province">
+          <option value="">Select…</option>
+          <option>Noord-Holland</option>
+          <option>Zuid-Holland</option>
+          <option>Noord-Brabant</option>
+          <option>Gelderland</option>
+          <option>Utrecht</option>
+          <option>Overijssel</option>
+          <option>Groningen</option>
+          <option>Friesland</option>
+          <option>Drenthe</option>
+          <option>Flevoland</option>
+          <option>Zeeland</option>
+          <option>Limburg</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Energy supplier</label>
+        <select id="s-supplier">
+          <option value="eneco">Eneco Dynamic</option>
+          <option value="essent">Essent Dynamic</option>
+          <option value="vattenfall">Vattenfall Variabel</option>
+          <option value="greenchoice">Greenchoice Vrij</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Do you have a home charger?</label>
+      <select id="s-charger-type">
+        <option value="11">Yes — 3-phase 11 kW</option>
+        <option value="7.4">Yes — single-phase 7.4 kW</option>
+        <option value="3.7">Yes — slow (3.7 kW)</option>
+        <option value="0">No — I use public charging</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(2)">← Back</button>
+      <button class="btn-next" onclick="goNext(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Vehicle -->
+  <div class="step-card" id="step-3">
+    <div class="step-heading">Which EV do you drive? 🚗</div>
+    <div class="step-sub">Select your vehicle so we can calculate charging times, efficiency, and optimal schedules.</div>
+    <div class="field vehicle-search">
+      <input type="text" id="vc-search" placeholder="Search model…" oninput="filterVcCards()" />
+    </div>
+    <div class="vehicle-grid" id="vc-grid">
+      <div style="text-align:center;color:var(--dim);padding:20px;grid-column:1/-1">Loading vehicles…</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(3)">← Back</button>
+      <button class="btn-next" onclick="goNext(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Habits -->
+  <div class="step-card" id="step-4">
+    <div class="step-heading">Your charging habits 🔌</div>
+    <div class="step-sub">This sets your default CACCS schedule. You can change it anytime in Settings.</div>
+
+    <div class="field">
+      <label>When do you usually plug in?</label>
+      <div class="range-row">
+        <div class="range-val" id="plugin-display">18:00</div>
+        <div class="range-field">
+          <input type="range" id="s-plugin" min="14" max="23" step="1" value="18" oninput="updateTimeDisplay('s-plugin','plugin-display')" />
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:2px">
+            <span>14:00</span><span>23:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>When do you need it ready?</label>
+      <div class="range-row">
+        <div class="range-val" id="deadline-display">07:00</div>
+        <div class="range-field">
+          <input type="range" id="s-deadline" min="4" max="12" step="1" value="7" oninput="updateTimeDisplay('s-deadline','deadline-display')" />
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:2px">
+            <span>04:00</span><span>12:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="field-hint" id="window-hint">Charging window: calculating…</div>
+    </div>
+
+    <div class="field">
+      <label>Average daily driving distance</label>
+      <div class="range-row">
+        <div class="range-val" id="km-display">40 km</div>
+        <div class="range-field">
+          <input type="range" id="s-daily-km" min="5" max="200" step="5" value="40" oninput="document.getElementById('km-display').textContent=this.value+' km'" />
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:2px">
+            <span>5 km</span><span>200 km</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:6px">
+      <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:10px">Charging profile</label>
+      <div class="profile-grid" id="survey-profile-grid">
+        <div class="profile-card" data-profile="saver" data-beta="0" onclick="selectSurveyProfile(this)">
+          <div class="pc-icon">💰</div>
+          <div class="pc-name">Budget Saver</div>
+          <div class="pc-beta">β = 0.0</div>
+          <div class="pc-desc">Always charge at lowest price</div>
+        </div>
+        <div class="profile-card active" data-profile="balance" data-beta="0.5" onclick="selectSurveyProfile(this)">
+          <div class="pc-icon">⚖️</div>
+          <div class="pc-name">Smart Balance</div>
+          <div class="pc-beta">β = 0.5</div>
+          <div class="pc-desc">Recommended — cost + grid</div>
+        </div>
+        <div class="profile-card" data-profile="eco" data-beta="1.0" onclick="selectSurveyProfile(this)">
+          <div class="pc-icon">🌿</div>
+          <div class="pc-name">Grid Hero</div>
+          <div class="pc-beta">β = 1.0</div>
+          <div class="pc-desc">Maximum grid benefit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(4)">← Back</button>
+      <button class="btn-next" onclick="goNext(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Review & Confirm -->
+  <div class="step-card" id="step-5">
+    <div class="step-heading">Almost done! 🎉</div>
+    <div class="step-sub">Review your settings and accept the terms to create your account.</div>
+
+    <div class="review-grid" id="review-grid"></div>
+
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:8px">Optional features</label>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">ERE certificates</div>
+          <div class="toggle-sub">Earn ~€0.082/kWh via NEa 2026 smart-charging certificates</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="s-ere" checked />
+          <span class="toggle-track"></span><span class="toggle-thumb"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Solar self-consumption</div>
+          <div class="toggle-sub">Align charging with your PV panels (post-saldering 2027)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="s-solar" />
+          <span class="toggle-track"></span><span class="toggle-thumb"></span>
+        </label>
+      </div>
+      <div class="toggle-row" id="kwp-row" style="display:none">
+        <div>
+          <div class="toggle-label">Solar system size (kWp)</div>
+        </div>
+        <input type="number" id="s-kwp" value="4" min="0.5" max="30" step="0.5" style="width:90px;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;background:var(--bg2);color:var(--text)" />
+      </div>
+    </div>
+
+    <div class="terms-box">
+      <input type="checkbox" id="s-terms" required />
+      <label for="s-terms">
+        I have read and accept the <a href="/terms" target="_blank">Terms of Service</a> and
+        <a href="/privacy" target="_blank">Privacy Policy</a>. I consent to my data being processed
+        for smart charging optimisation as described. (GDPR Art. 6(1)(a))
+      </label>
+    </div>
+    <div class="terms-box">
+      <input type="checkbox" id="s-gdpr" required />
+      <label for="s-gdpr">
+        I understand that SmartEV stores my email, hashed password, and charging preferences.
+        I can export or delete my data at any time from the dashboard.
+      </label>
+    </div>
+
+    <div class="err-banner" id="err-submit"></div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(5)">← Back</button>
+      <button class="btn-next" id="submit-btn" onclick="submitSurvey()">Create account →</button>
+    </div>
+  </div>
+
+</div><!-- end survey-wrap -->
+
+<script>
+(function(){ const t=localStorage.getItem("theme")||"light"; document.documentElement.setAttribute("data-theme",t); updateThemeBtn(); })();
+function updateThemeBtn() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.getElementById("theme-toggle").textContent = isDark ? "☀️" : "🌙";
+}
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const n = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", n);
+  localStorage.setItem("theme", n);
+  updateThemeBtn();
+});
+
+if (localStorage.getItem("token")) window.location.href = "/dashboard";
+
+const API = "";
+let vcCatalog = [];
+let selectedVehicle = null;
+let currentStep = 1;
+const TOTAL_STEPS = 5;
+
+// ── Progress ──────────────────────────────────────────────────────────────
+function updateProgress(step) {
+  document.querySelectorAll(".ps-step").forEach(el => {
+    const n = parseInt(el.dataset.step);
+    el.className = "ps-step" + (n < step ? " done" : n === step ? " active" : "");
+    const circle = el.querySelector(".ps-circle");
+    circle.textContent = n < step ? "✓" : n;
+  });
+  document.querySelectorAll(".ps-connector").forEach(el => {
+    el.className = "ps-connector" + (parseInt(el.dataset.conn) < step ? " done" : "");
+  });
+  const pct = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function goNext(from) {
+  if (!validateStep(from)) return;
+  if (from === 3) buildReview();
+  showStep(from + 1);
+}
+function goBack(from) {
+  showStep(from - 1);
+}
+function showStep(n) {
+  document.querySelectorAll(".step-card").forEach(s => s.classList.remove("active"));
+  document.getElementById("step-" + n).classList.add("active");
+  updateProgress(n);
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Validation ────────────────────────────────────────────────────────────
+function showErr(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = show ? "block" : "none";
+}
+function validateStep(step) {
+  let ok = true;
+  if (step === 1) {
+    const name = document.getElementById("s-name").value.trim();
+    const email = document.getElementById("s-email").value.trim();
+    const pw = document.getElementById("s-password").value;
+    const pw2 = document.getElementById("s-password2").value;
+    showErr("err-name", !name);
+    showErr("err-email", !email || !email.includes("@"));
+    showErr("err-password", pw.length < 8);
+    showErr("err-password2", pw !== pw2);
+    ok = name && email && email.includes("@") && pw.length >= 8 && pw === pw2;
+  }
+  return ok;
+}
+
+// ── Password strength ─────────────────────────────────────────────────────
+document.getElementById("s-password").addEventListener("input", function() {
+  const v = this.value;
+  let score = 0;
+  if (v.length >= 8) score++;
+  if (/[A-Z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const colors = ["#F87171","#FB923C","#FBBF24","#22D3A5"];
+  const labels = ["Too short","Weak","Good","Strong ✓"];
+  document.getElementById("pw-fill").style.cssText = `width:${v.length > 0 ? [25,50,75,100][score-1]||10 : 0}%;background:${v.length > 0 ? colors[score-1]||'#F87171' : ''}`;
+  document.getElementById("pw-label").textContent = v.length > 0 ? (labels[score-1]||"Too short") : "Enter a password";
+});
+
+// ── Time display helpers ──────────────────────────────────────────────────
+function updateTimeDisplay(sliderId, displayId) {
+  const v = parseInt(document.getElementById(sliderId).value);
+  document.getElementById(displayId).textContent = String(v).padStart(2,"0") + ":00";
+  updateWindowHint();
+}
+function updateWindowHint() {
+  const plugin = parseInt(document.getElementById("s-plugin").value);
+  const deadline = parseInt(document.getElementById("s-deadline").value);
+  const windowH = deadline > plugin ? deadline - plugin : 24 - plugin + deadline;
+  const hint = document.getElementById("window-hint");
+  if (!hint) return;
+  if (windowH <= 0) { hint.textContent = "⚠ Same time — choose different hours"; hint.style.color = "var(--red)"; return; }
+  hint.textContent = `${windowH}h window — ${windowH >= 8 ? 'plenty of time' : windowH >= 4 ? 'enough for a full charge' : 'tight — consider extending'}`;
+  hint.style.color = windowH >= 4 ? "var(--green)" : "var(--yellow)";
+}
+document.getElementById("s-plugin").addEventListener("input", () => updateTimeDisplay("s-plugin","plugin-display"));
+document.getElementById("s-deadline").addEventListener("input", () => updateTimeDisplay("s-deadline","deadline-display"));
+updateWindowHint();
+
+// ── Vehicle picker ────────────────────────────────────────────────────────
+async function loadVehiclesCatalog() {
+  try {
+    const r = await fetch(`${API}/api/vehicles/catalog`);
+    const d = await r.json();
+    vcCatalog = d.vehicles || [];
+    renderVcCards(vcCatalog);
+  } catch { document.getElementById("vc-grid").innerHTML = '<div style="color:var(--dim);text-align:center;padding:20px;grid-column:1/-1">Could not load catalog</div>'; }
+}
+
+const BRAND_COLORS_S = { Tesla:'#EF4444', Volkswagen:'#2563EB', Skoda:'#16A34A', Audi:'#6B7280', Cupra:'#EA580C', Hyundai:'#2563EB', Kia:'#DC2626', Volvo:'#1B5E20', Renault:'#D97706', BMW:'#1E40AF', Ford:'#2563EB', Peugeot:'#7C3AED', MG:'#B91C1C', BYD:'#1D4ED8' };
+
+function renderVcCards(items) {
+  const grid = document.getElementById("vc-grid");
+  grid.innerHTML = items.map(m => {
+    const bc = BRAND_COLORS_S[m.brand] || '#6B7280';
+    const isSelected = selectedVehicle && selectedVehicle.model_name === m.model_name;
+    return `<div class="vc-card ${isSelected ? 'selected' : ''}" onclick="selectVehicle(${m.id})" data-name="${m.model_name.toLowerCase()}">
+      <div class="vc-brand" style="color:${bc}">${m.brand}</div>
+      <div class="vc-name">${m.model_name.startsWith(m.brand) ? m.model_name.slice(m.brand.length+1) : m.model_name}</div>
+      <div class="vc-stats">
+        <span>${m.battery_kwh} kWh</span>
+        <span>${m.wltp_km} km</span>
+        <span>${m.efficiency_kwh_100km} kWh/100</span>
+      </div>
+    </div>`;
+  }).join("") + `<div class="no-car-opt ${!selectedVehicle ? 'selected' : ''}" onclick="selectVehicle(null)">
+    I don't have an EV yet — skip this step
+  </div>`;
+}
+
+window.selectVehicle = (id) => {
+  if (id === null) { selectedVehicle = null; }
+  else { selectedVehicle = vcCatalog.find(m => m.id === id) || null; }
+  renderVcCards(vcCatalog.filter(m => {
+    const q = document.getElementById("vc-search").value.toLowerCase();
+    return !q || m.model_name.toLowerCase().includes(q) || m.brand.toLowerCase().includes(q);
+  }));
+};
+
+window.filterVcCards = () => {
+  const q = document.getElementById("vc-search").value.toLowerCase();
+  const filtered = q ? vcCatalog.filter(m => m.model_name.toLowerCase().includes(q) || m.brand.toLowerCase().includes(q)) : vcCatalog;
+  renderVcCards(filtered);
+};
+
+// ── Profile selector ──────────────────────────────────────────────────────
+window.selectSurveyProfile = (el) => {
+  document.querySelectorAll("#survey-profile-grid .profile-card").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+};
+
+// ── Solar row toggle ──────────────────────────────────────────────────────
+document.getElementById("s-solar").addEventListener("change", function() {
+  document.getElementById("kwp-row").style.display = this.checked ? "flex" : "none";
+});
+
+// ── Review card ───────────────────────────────────────────────────────────
+function buildReview() {
+  const plugin = parseInt(document.getElementById("s-plugin").value);
+  const deadline = parseInt(document.getElementById("s-deadline").value);
+  const profile = document.querySelector("#survey-profile-grid .profile-card.active");
+  const supplier = document.getElementById("s-supplier");
+  const charger = document.getElementById("s-charger-type");
+
+  const items = [
+    { k: "Name", v: document.getElementById("s-name").value },
+    { k: "Email", v: document.getElementById("s-email").value },
+    { k: "Supplier", v: supplier.options[supplier.selectedIndex].text },
+    { k: "Charger", v: charger.options[charger.selectedIndex].text },
+    { k: "Plug-in time", v: String(plugin).padStart(2,"0") + ":00" },
+    { k: "Ready by", v: String(deadline).padStart(2,"0") + ":00" },
+    { k: "Daily km", v: document.getElementById("s-daily-km").value + " km" },
+    { k: "Profile", v: profile ? profile.querySelector(".pc-name").textContent : "Smart Balance" },
+    { k: "Vehicle", v: selectedVehicle ? selectedVehicle.model_name : "No vehicle selected" },
+    { k: "Province", v: document.getElementById("s-province").value || "Not specified" },
+  ];
+  document.getElementById("review-grid").innerHTML = items.map(i =>
+    `<div class="review-item"><div class="review-key">${i.k}</div><div class="review-val">${i.v}</div></div>`
+  ).join("");
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────
+window.submitSurvey = async () => {
+  const errEl = document.getElementById("err-submit");
+  errEl.classList.remove("show");
+
+  if (!document.getElementById("s-terms").checked) {
+    errEl.textContent = "Please accept the Terms of Service and Privacy Policy to continue.";
+    errEl.classList.add("show"); return;
+  }
+  if (!document.getElementById("s-gdpr").checked) {
+    errEl.textContent = "Please confirm the data processing consent to continue.";
+    errEl.classList.add("show"); return;
+  }
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Creating account…";
+
+  const profile = document.querySelector("#survey-profile-grid .profile-card.active");
+  const body = {
+    name: document.getElementById("s-name").value.trim(),
+    email: document.getElementById("s-email").value.trim(),
+    password: document.getElementById("s-password").value,
+    supplier: document.getElementById("s-supplier").value,
+    charging_profile: profile ? profile.dataset.profile : "balance",
+    gdpr_consent: true,
+  };
+
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      const msg = Array.isArray(err.detail) ? err.detail.map(e => e.msg).join('; ') : (err.detail || "Registration failed");
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    const tok = data.access_token;
+
+    // Save extra profile data
+    const plugin = parseInt(document.getElementById("s-plugin").value);
+    const deadline = parseInt(document.getElementById("s-deadline").value);
+    const updates = {
+      address: document.getElementById("s-address").value.trim() || null,
+      plugin_time: plugin,
+      deadline: deadline,
+      ere_enabled: document.getElementById("s-ere").checked,
+      solar_enabled: document.getElementById("s-solar").checked,
+      solar_kwp: parseFloat(document.getElementById("s-kwp").value) || 4.0,
+    };
+    await fetch(`${API}/api/auth/me`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${tok}` },
+      body: JSON.stringify(updates),
+    });
+
+    // Add vehicle if selected
+    if (selectedVehicle) {
+      await fetch(`${API}/api/vehicles`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${tok}` },
+        body: JSON.stringify({
+          model_name: selectedVehicle.model_name, brand: selectedVehicle.brand,
+          year: selectedVehicle.year, battery_kwh: selectedVehicle.battery_kwh,
+          wltp_km: selectedVehicle.wltp_km, ac_power_kw: selectedVehicle.ac_power_kw,
+          efficiency_kwh_100km: selectedVehicle.efficiency_kwh_100km, is_default: true,
+        }),
+      });
+    }
+
+    localStorage.setItem("token", tok);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/dashboard";
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.classList.add("show");
+    btn.disabled = false; btn.textContent = "Create account →";
+  }
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────
+loadVehiclesCatalog();
+</script>
+</body>
+</html>

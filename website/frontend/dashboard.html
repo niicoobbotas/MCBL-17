@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SmartEV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #060B16; --bg2: #0D1726; --bg3: #111E30;
+      --surface: rgba(255,255,255,0.04); --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08); --border-bright: rgba(255,255,255,0.14);
+      --green: #22D3A5; --green-bg: rgba(34,211,165,0.08); --green-border: rgba(34,211,165,0.2);
+      --blue: #3B82F6; --yellow: #FBBF24; --red: #F87171; --orange: #FB923C;
+      --text: #F0F4FF; --text-muted: #7C8FA8; --text-dim: #3A4A5C;
+      --sidebar-w: 240px; --radius: 12px;
+    }
+    [data-theme="light"] {
+      --bg: #F0F4F8; --bg2: #FFFFFF; --bg3: #E8EFF7;
+      --surface: rgba(0,0,0,0.03); --surface-hover: rgba(0,0,0,0.05);
+      --border: rgba(0,0,0,0.07); --border-bright: rgba(0,0,0,0.12);
+      --green: #16A34A; --green-bg: rgba(22,163,74,0.08); --green-border: rgba(22,163,74,0.2);
+      --blue: #2563EB; --yellow: #D97706; --red: #DC2626; --orange: #EA580C;
+      --text: #111827; --text-muted: #4B5563; --text-dim: #D1D5DB;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-w); background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 50; overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 22px 20px; display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid var(--border); font-weight: 700; font-size: 17px;
+      text-decoration: none; color: var(--text); flex-shrink: 0;
+    }
+    .sidebar-logo-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .sidebar-nav { flex: 1; padding: 14px 12px; }
+    .nav-section-label {
+      font-size: 10px; font-weight: 600; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 8px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      font-size: 13.5px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; text-decoration: none; transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+    .nav-item.active { background: var(--green-bg); color: var(--green); }
+    .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+    .nav-item.active svg { opacity: 1; }
+    .sidebar-user { padding: 14px; border-top: 1px solid var(--border); }
+    .sidebar-user-card {
+      display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .sidebar-user-card:hover { background: var(--surface); }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #060B16; flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-email { font-size: 11px; color: var(--text-muted); }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(6,11,22,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    [data-theme="light"] .topbar { background: rgba(240,244,248,0.92); }
+    .topbar-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      border-radius: 100px; padding: 4px 11px;
+      font-size: 12px; color: var(--green); font-weight: 500;
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(1.3);} }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border-bright); background: var(--bg3);
+      color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:hover { color: var(--text); background: var(--surface-hover); }
+    .content { padding: 28px 28px; flex: 1; }
+
+    /* ── TABS ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── GENERIC CARD ── */
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+    .card + .card { margin-top: 14px; }
+    .card-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    .card-heading { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .card-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+    /* ── GRIDS ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    /* ── METRIC CARD ── */
+    .metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px; }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .metric-value { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+    .metric-value.green { color: var(--green); }
+    .metric-value.blue { color: var(--blue); }
+    .metric-value.yellow { color: var(--yellow); }
+    .metric-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── PRICE CHART ── */
+    .price-display-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    .price-big { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; color: var(--green); }
+    .price-unit { font-size: 16px; color: var(--text-muted); }
+    .price-change { font-size: 13px; font-weight: 500; }
+    .chart-wrap { position: relative; height: 200px; margin-top: 14px; }
+    .price-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .price-stat { background: var(--bg3); border-radius: 8px; padding: 12px; }
+    .price-stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+    .price-stat-val { font-size: 17px; font-weight: 700; }
+
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 5px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    select, input[type="number"], input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; color: var(--text);
+      font-family: inherit; font-size: 13px; transition: border-color 0.2s;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--green); }
+    select option { background: var(--bg3); }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      color: #060B16; border: none; border-radius: 8px;
+      padding: 10px 22px; font-family: inherit; font-size: 13.5px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-secondary {
+      background: var(--bg3); border: 1px solid var(--border-bright);
+      color: var(--text); border-radius: 8px;
+      padding: 9px 18px; font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+    .btn-danger {
+      background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25);
+      color: var(--red); border-radius: 8px;
+      padding: 9px 18px; font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-danger:hover { background: rgba(248,113,113,0.16); }
+    .btn-run {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, var(--green), #0EA5E9);
+      color: #060B16; border: none; border-radius: 10px;
+      font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s; margin: 6px 0 18px;
+    }
+    .btn-run:hover { opacity: 0.88; }
+    .btn-run:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── TOGGLE ── */
+    .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .toggle input { display: none; }
+    .toggle-track { position: absolute; inset: 0; border-radius: 12px; background: var(--border-bright); transition: background 0.2s; }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; }
+    .toggle input:checked ~ .toggle-track { background: var(--green); }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+    /* ── PROFILE CARDS ── */
+    .profile-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+    .profile-opt {
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 10px 11px;
+      cursor: pointer; transition: all 0.18s; text-align: center; background: var(--bg3);
+    }
+    .profile-opt:hover { border-color: var(--border-bright); }
+    .profile-opt.active { border-color: var(--green); background: var(--green-bg); }
+    .po-icon { font-size: 18px; margin-bottom: 5px; }
+    .po-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .po-beta { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-bottom: 4px; }
+    .po-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+
+    /* ── SOC RING ── */
+    .soc-ring-container { display: flex; justify-content: center; margin: 18px 0 10px; }
+    .soc-ring-outer { width: 130px; height: 130px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+    .soc-ring-svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+    .soc-ring-text { text-align: center; position: relative; z-index: 1; }
+    .soc-percent { font-size: 32px; font-weight: 800; color: var(--green); }
+    .soc-label { font-size: 10px; color: var(--text-muted); }
+    .soc-hint { font-size: 11px; color: var(--text-muted); text-align: center; min-height: 16px; padding: 0 8px 12px; }
+
+    /* ── SCHEDULE ── */
+    .saving-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+    }
+    .saving-banner-amount { font-size: 20px; font-weight: 700; color: var(--green); }
+    .saving-banner-label { font-size: 12px; color: var(--text-muted); }
+    .schedule-bars-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); padding: 0 4px; margin-bottom: 6px; }
+    .schedule-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .schedule-hour-label { width: 40px; font-size: 11px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+    .schedule-track { flex: 1; height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+    .schedule-fill { height: 100%; border-radius: 4px; }
+    .schedule-kw-label { width: 44px; font-size: 11px; text-align: right; }
+    .schedule-price-label { width: 46px; font-size: 10px; color: var(--text-dim); text-align: right; }
+    .cost-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .cost-box { background: var(--bg3); border-radius: 8px; padding: 12px; }
+    .cost-box.best { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .cost-box-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .cost-box.best .cost-box-label { color: var(--green); }
+    .cost-box-val { font-size: 20px; font-weight: 700; }
+
+    /* ── BILL ── */
+    .bill-hero { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+    .bill-amount { font-size: 48px; font-weight: 900; letter-spacing: -0.04em; }
+    .saving-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      border-radius: 100px; padding: 4px 12px;
+      font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 18px;
+    }
+    .bill-chart-wrap { position: relative; height: 150px; }
+    .sessions-list { margin-top: 12px; }
+    .session-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .session-row:last-child { border-bottom: none; }
+    .session-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .session-info { flex: 1; }
+    .session-date { font-size: 11px; color: var(--text-muted); }
+    .session-kwh { font-size: 13px; font-weight: 600; }
+    .session-cost-val { font-size: 13px; font-weight: 600; text-align: right; }
+    .session-saving { font-size: 11px; color: var(--green); text-align: right; }
+    .proj-card {
+      background: linear-gradient(135deg, var(--green-bg), rgba(14,165,233,0.05));
+      border: 1px solid var(--green-border); border-radius: var(--radius); padding: 22px;
+      margin-bottom: 14px;
+    }
+    .proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .proj-item { background: var(--bg2); border-radius: 8px; padding: 14px; text-align: center; }
+    .proj-val { font-size: 22px; font-weight: 800; color: var(--green); }
+    .proj-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ── VEHICLES ── */
+    .garage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .garage-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px; transition: border-color 0.2s;
+    }
+    .garage-card.default { border-color: var(--green-border); }
+    .gc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .gc-brand-tag {
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .default-badge {
+      font-size: 10px; background: var(--green-bg); border: 1px solid var(--green-border);
+      color: var(--green); border-radius: 100px; padding: 2px 8px; font-weight: 600;
+    }
+    .year-pill { font-size: 10px; color: var(--text-muted); background: var(--bg3); border-radius: 4px; padding: 2px 6px; margin-left: 4px; }
+    .gc-name { font-size: 15px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+    .gc-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+    .gc-spec { background: var(--bg3); border-radius: 6px; padding: 8px 10px; }
+    .gc-spec strong { display: block; font-size: 14px; font-weight: 700; line-height: 1; }
+    .gc-spec span { font-size: 10px; color: var(--text-muted); }
+    .gc-info { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+    .gc-actions { display: flex; gap: 8px; }
+    .gc-btn { flex: 1; padding: 7px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+    .gc-btn-default { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+    .gc-btn-default:hover { background: rgba(34,211,165,0.14); }
+    .gc-btn-remove { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
+    .gc-btn-remove:hover { background: rgba(248,113,113,0.14); }
+    .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+    .empty-state p { margin-bottom: 8px; }
+    .catalog-section { margin-top: 24px; }
+    .catalog-toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .catalog-toolbar input, .catalog-toolbar select { flex: 1; min-width: 140px; max-width: 260px; }
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .catalog-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; transition: border-color 0.18s;
+    }
+    .catalog-card:hover { border-color: var(--border-bright); }
+    .cc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .cc-brand { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+    .cc-year { font-size: 10px; color: var(--text-muted); }
+    .cc-model { font-size: 14px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .cc-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; }
+    .cc-spec-item { font-size: 11px; color: var(--text-muted); }
+    .cc-spec-item strong { color: var(--text); }
+    .cc-price { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+    .cc-add-btn {
+      width: 100%; padding: 8px; border-radius: 7px;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all 0.18s;
+    }
+    .cc-add-btn:hover:not(:disabled) { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+    .cc-add-btn.added { background: var(--green-bg); border-color: var(--green-border); color: var(--green); cursor: default; }
+    .eff-badge { font-weight: 700; }
+
+    /* ── SETTINGS ── */
+    .settings-max { max-width: 660px; }
+    .settings-section { margin-bottom: 20px; }
+    .settings-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+    .settings-card-title {
+      font-size: 13px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .settings-card-title svg { color: var(--text-muted); }
+    .settings-row {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .settings-row-label { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .settings-row-sub { font-size: 12px; color: var(--text-muted); }
+    .settings-row-ctrl { flex-shrink: 0; }
+    .settings-row-ctrl select, .settings-row-ctrl input { width: 150px; }
+    .info-box {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-top: 12px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    }
+    .info-box strong { color: var(--text); }
+    .info-box h4 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .info-req { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 12px; }
+    .info-req::before { content: "→"; color: var(--green); flex-shrink: 0; }
+    .info-estimate {
+      margin-top: 10px; padding: 8px 12px;
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      border-radius: 6px; font-size: 12px; color: var(--green); font-weight: 600;
+    }
+    .pw-fields { display: grid; gap: 10px; }
+    .danger-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+    /* ── SCHEDULE STAGES ── */
+    .stage-header {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin: 16px 0 10px; padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .stage-header.first { border-top: none; margin-top: 2px; padding-top: 0; }
+    .stage-num {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green-bg); border: 1px solid var(--green-border);
+      color: var(--green); font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .window-strip {
+      border-radius: 8px; padding: 10px 13px;
+      font-size: 12px; display: flex; align-items: center; gap: 8px;
+      margin: 4px 0 8px; border: 1px solid var(--border); background: var(--bg3);
+      transition: all 0.2s;
+    }
+    .window-strip.ok { border-color: var(--green-border); background: var(--green-bg); color: var(--green); }
+    .window-strip.warn { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.07); color: var(--yellow); }
+    .window-strip.err { border-color: rgba(248,113,113,0.35); background: rgba(248,113,113,0.07); color: var(--red); }
+    .soc-tick-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+    /* ── CAR IMAGES ── */
+    .car-img-wrap {
+      width: 100%; height: 130px; border-radius: 8px; overflow: hidden;
+      background: var(--bg3); margin-bottom: 10px; position: relative;
+    }
+    .car-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .car-img-ph {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--text-dim);
+    }
+    .cc-img-wrap {
+      width: 100%; height: 110px; border-radius: 6px; overflow: hidden;
+      background: var(--bg3); margin-bottom: 8px; position: relative;
+    }
+    .cc-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cc-img-ph {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--text-dim);
+    }
+
+    /* ── VEHICLE DETAIL MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      animation: fadeBg 0.2s ease;
+    }
+    @keyframes fadeBg { from{opacity:0} to{opacity:1} }
+    .modal-box {
+      background: var(--bg2); border: 1px solid var(--border-bright);
+      border-radius: 16px; width: 100%; max-width: 560px; max-height: 90vh;
+      overflow-y: auto; position: relative;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-header {
+      position: sticky; top: 0; background: var(--bg2);
+      padding: 16px 20px 0; border-radius: 16px 16px 0 0; z-index: 1;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-close-btn {
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--bg3); cursor: pointer; font-size: 16px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .modal-body { padding: 12px 20px 24px; }
+    .modal-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 14px; background: var(--bg3); }
+    .modal-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .modal-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .modal-specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 14px 0; }
+    .modal-spec { background: var(--bg3); border-radius: 8px; padding: 12px; }
+    .modal-spec-val { font-size: 20px; font-weight: 800; line-height: 1; }
+    .modal-spec-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .modal-section { margin-top: 14px; }
+    .modal-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px; }
+    .charge-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .charge-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 6px 10px; background: var(--bg3); }
+    .charge-table td { padding: 8px 10px; border-top: 1px solid var(--border); }
+    .modal-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 10px; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 16px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--bg2); border: 1px solid var(--border-bright);
+      border-radius: 10px; padding: 12px 18px; font-size: 13px; font-weight: 500;
+      transform: translateY(80px); opacity: 0; transition: transform 0.3s, opacity 0.3s;
+      pointer-events: none; max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok { border-color: var(--green-border); color: var(--green); }
+    .toast.err { border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .price-stats, .proj-grid { grid-template-columns: 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────────────────── -->
+<div class="sidebar">
+  <a href="/" class="sidebar-logo">
+    <div class="sidebar-logo-icon">⚡</div>
+    SmartEV
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <button class="nav-item active" data-tab="market">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Electricity Market
+    </button>
+    <button class="nav-item" data-tab="schedule">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Smart Schedule
+    </button>
+    <button class="nav-item" data-tab="bill">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Energy Bill
+    </button>
+    <div class="nav-section-label">My EV</div>
+    <button class="nav-item" data-tab="vehicles">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      My Vehicles
+    </button>
+    <button class="nav-item" data-tab="settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+      Settings
+    </button>
+  </nav>
+  <div class="sidebar-user">
+    <div class="sidebar-user-card" id="user-card" onclick="document.querySelector('[data-tab=settings]').click()">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div>
+        <div class="user-name" id="user-name">Loading…</div>
+        <div class="user-email" id="user-email-disp">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ────────────────────────────────────────────────────────── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Electricity Market</div>
+    <div class="topbar-actions">
+      <div class="live-badge"><div class="live-dot"></div> Live prices</div>
+      <button class="icon-btn" id="dash-theme-btn" title="Toggle theme">
+        <svg id="dash-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg id="dash-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <button class="btn-danger" style="padding:6px 14px;font-size:12px;" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── MARKET TAB ── -->
+    <div class="tab-content active" id="tab-market">
+      <div style="margin-bottom:14px;">
+        <div class="card">
+          <div class="card-title">Current spot price</div>
+          <div class="price-display-row">
+            <div class="price-big" id="mkt-current-price">—</div>
+            <div class="price-unit">/kWh</div>
+            <div class="price-change" id="mkt-price-change">—</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">Cheapest 3h window today: <strong id="mkt-cheapest" style="color:var(--green)">—</strong></div>
+          <div class="chart-wrap"><canvas id="market-chart"></canvas></div>
+          <div class="price-stats">
+            <div class="price-stat">
+              <div class="price-stat-label">Peak</div>
+              <div class="price-stat-val" id="mkt-peak" style="color:var(--red)">—</div>
+              <div style="font-size:11px;color:var(--text-dim)" id="mkt-peak-time">—</div>
+            </div>
+            <div class="price-stat">
+              <div class="price-stat-label">24h average</div>
+              <div class="price-stat-val" id="mkt-avg">—</div>
+            </div>
+            <div class="price-stat">
+              <div class="price-stat-label">Overnight low</div>
+              <div class="price-stat-val" id="mkt-low" style="color:var(--green)">—</div>
+              <div style="font-size:11px;color:var(--text-dim)" id="mkt-low-time">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-4">
+        <div class="metric-card">
+          <div class="metric-label">Saved this year</div>
+          <div class="metric-value green" id="stat-total-savings">€0</div>
+          <div class="metric-sub">vs. fixed contract</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Sessions this month</div>
+          <div class="metric-value blue" id="stat-month-sessions">0</div>
+          <div class="metric-sub">charging sessions</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Month cost</div>
+          <div class="metric-value" id="stat-month-cost">€0</div>
+          <div class="metric-sub" id="stat-month-savings-sub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total kWh charged</div>
+          <div class="metric-value" id="stat-total-kwh">0</div>
+          <div class="metric-sub">kilowatt-hours</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULE TAB ── -->
+    <div class="tab-content" id="tab-schedule">
+      <div class="grid-2">
+        <!-- LEFT: Configure -->
+        <div class="card">
+          <div class="card-title">Configure Session</div>
+
+          <!-- Stage 1: Window -->
+          <div class="stage-header first">
+            <span class="stage-num">1</span> Charging window
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>My vehicle</label>
+              <select id="sch-vehicle"></select>
+            </div>
+            <div class="field">
+              <label>Charger power</label>
+              <select id="sch-pmax">
+                <option value="3.7">3.7 kW — slow</option>
+                <option value="7.4">7.4 kW — standard</option>
+                <option value="11" selected>11 kW — fast</option>
+                <option value="22">22 kW — 3-phase</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Plug in at</label>
+              <select id="sch-plugin"></select>
+            </div>
+            <div class="field">
+              <label>Ready by</label>
+              <select id="sch-deadline"></select>
+            </div>
+          </div>
+          <div class="window-strip" id="window-strip">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="window-text">Select vehicle and times to see charging window</span>
+          </div>
+
+          <!-- Stage 2: Target SoC -->
+          <div class="stage-header">
+            <span class="stage-num">2</span> Target charge
+          </div>
+          <div class="field">
+            <label>Current battery (%)</label>
+            <input type="number" id="sch-current-soc" value="20" min="0" max="99" placeholder="20"
+              style="width:130px;" />
+          </div>
+          <div class="field">
+            <label>Target — <span id="soc-val-label">80%</span>
+              <span id="soc-max-tag" style="font-size:10px;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px"></span>
+            </label>
+            <input type="range" id="soc-slider" min="21" max="100" step="1" value="80"
+              style="width:100%;accent-color:var(--green);margin:5px 0 2px;" />
+            <div class="soc-tick-row"><span id="soc-min-tick">21%</span><span id="soc-max-tick">100%</span></div>
+          </div>
+          <div class="field">
+            <label>Energy needed (kWh)</label>
+            <input type="number" id="sch-energy" value="36" min="0.1" max="200" step="0.5" />
+          </div>
+          <p class="soc-hint" id="soc-hint" style="margin-bottom:4px"></p>
+
+          <!-- Stage 3: Profile -->
+          <div class="stage-header">
+            <span class="stage-num">3</span> Charging profile</div>
+          <div class="profile-row" id="sch-profile-row">
+            <div class="profile-opt" data-profile="saver" data-beta="0" onclick="selectSchProfile(this)">
+              <div class="po-icon">💰</div>
+              <div class="po-name">Budget Saver</div>
+              <div class="po-beta">β = 0.0</div>
+              <div class="po-desc">Minimum cost, charge in cheapest hours</div>
+            </div>
+            <div class="profile-opt active" data-profile="balance" data-beta="0.5" onclick="selectSchProfile(this)">
+              <div class="po-icon">⚖️</div>
+              <div class="po-name">Smart Balance</div>
+              <div class="po-beta">β = 0.5</div>
+              <div class="po-desc">Cost + grid balance — recommended</div>
+            </div>
+            <div class="profile-opt" data-profile="eco" data-beta="1.0" onclick="selectSchProfile(this)">
+              <div class="po-icon">🌿</div>
+              <div class="po-name">Grid Hero</div>
+              <div class="po-beta">β = 1.0</div>
+              <div class="po-desc">Maximum grid congestion relief</div>
+            </div>
+          </div>
+
+          <button class="btn-run" id="sch-run-btn">Compute CACCS Schedule</button>
+
+          <div id="sch-saving-banner" class="saving-banner" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div>
+              <div class="saving-banner-amount" id="sch-saving-amount">—</div>
+              <div class="saving-banner-label">saved vs. fixed contract tonight</div>
+            </div>
+          </div>
+
+          <div id="sch-schedule-viz" style="display:none">
+            <div class="schedule-bars-header"><span>Hour</span><span>Power / Price</span></div>
+            <div id="sch-bars"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Target + Costs -->
+        <div>
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-title">Target State of Charge</div>
+            <div class="soc-ring-container">
+              <div class="soc-ring-outer">
+                <svg class="soc-ring-svg" width="130" height="130">
+                  <circle cx="65" cy="65" r="54" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="9" />
+                  <circle id="soc-circle" cx="65" cy="65" r="54" fill="none" stroke="var(--green)" stroke-width="9"
+                    stroke-dasharray="339.3" stroke-dashoffset="67.9" stroke-linecap="round" />
+                </svg>
+                <div class="soc-ring-text">
+                  <div class="soc-percent" id="soc-val">80%</div>
+                  <div class="soc-label">target SoC</div>
+                </div>
+              </div>
+            </div>
+            <p class="soc-hint" id="soc-hint">Select a vehicle and adjust the sliders above</p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Cost Comparison</div>
+            <div class="cost-grid">
+              <div class="cost-box">
+                <div class="cost-box-label">Fixed contract</div>
+                <div class="cost-box-val" id="cost-fixed">—</div>
+              </div>
+              <div class="cost-box">
+                <div class="cost-box-label" style="color:var(--red)">Uncontrolled</div>
+                <div class="cost-box-val" style="color:var(--red)" id="cost-unc">—</div>
+              </div>
+              <div class="cost-box">
+                <div class="cost-box-label" style="color:var(--yellow)">Price-only</div>
+                <div class="cost-box-val" style="color:var(--yellow)" id="cost-po">—</div>
+              </div>
+              <div class="cost-box best">
+                <div class="cost-box-label">CACCS Smart ✓</div>
+                <div class="cost-box-val" style="color:var(--green)" id="cost-sm">—</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:140px;margin-top:12px;">
+              <canvas id="sch-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BILL TAB ── -->
+    <div class="tab-content" id="tab-bill">
+      <div class="grid-4" style="margin-bottom:14px;">
+        <div class="metric-card">
+          <div class="metric-label">This month</div>
+          <div class="metric-value green" id="bill-month-cost">€0</div>
+          <div class="metric-sub">charging cost</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Monthly savings</div>
+          <div class="metric-value green" id="bill-month-saving">€0</div>
+          <div class="metric-sub">vs. fixed contract</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">kWh this year</div>
+          <div class="metric-value blue" id="bill-total-kwh">0</div>
+          <div class="metric-sub">kilowatt-hours</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">CO₂ avoided</div>
+          <div class="metric-value" id="bill-co2">0 kg</div>
+          <div class="metric-sub">vs. grid average</div>
+        </div>
+      </div>
+
+      <div id="bill-projection"></div>
+
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card">
+          <div class="card-title">Monthly overview</div>
+          <div class="bill-chart-wrap"><canvas id="bill-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recent sessions</div>
+          <div class="sessions-list" id="sessions-list">
+            <div class="empty-state" style="padding:20px 0">
+              <p>No charging sessions yet.</p>
+              <p style="font-size:12px">Run a CACCS schedule and log it to start tracking.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Log a charging session</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px;">
+          <div class="field">
+            <label>kWh delivered</label>
+            <input type="number" id="log-kwh" value="30" min="1" />
+          </div>
+          <div class="field">
+            <label>Cost (€)</label>
+            <input type="number" id="log-cost" value="3.50" step="0.01" />
+          </div>
+          <div class="field">
+            <label>Saved vs fixed (€)</label>
+            <input type="number" id="log-saving" value="1.20" step="0.01" />
+          </div>
+          <div class="field">
+            <label>Policy</label>
+            <select id="log-policy">
+              <option value="smart">CACCS Smart</option>
+              <option value="price_only">Price-only</option>
+              <option value="uncontrolled">Uncontrolled</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="log-btn">Log session</button>
+      </div>
+    </div>
+
+    <!-- ── VEHICLES TAB ── -->
+    <div class="tab-content" id="tab-vehicles">
+      <div style="margin-bottom:8px">
+        <div style="font-size:18px;font-weight:700;margin-bottom:4px">My Garage</div>
+        <div style="font-size:13px;color:var(--text-muted)">Your registered EVs. The default vehicle pre-fills the schedule calculator.</div>
+      </div>
+      <div class="garage-grid" id="garage-grid">
+        <div class="empty-state"><p>No vehicles in your garage yet.</p><p>Browse the catalog below to add your EV.</p></div>
+      </div>
+
+      <div class="catalog-section">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">Vehicle Catalog</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px">20 popular EVs available in the Netherlands — click to add to your garage.</div>
+        <div class="catalog-toolbar">
+          <input type="text" id="cat-search" placeholder="Search model…" oninput="filterCatalog()" style="max-width:220px" />
+          <select id="cat-brand" onchange="filterCatalog()" style="max-width:180px">
+            <option value="">All brands</option>
+          </select>
+          <select id="cat-sort" onchange="sortCatalog()" style="max-width:180px">
+            <option value="range">Sort: range</option>
+            <option value="battery">Sort: battery</option>
+            <option value="efficiency">Sort: efficiency</option>
+            <option value="price">Sort: price</option>
+          </select>
+        </div>
+        <div class="catalog-grid" id="catalog-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ── -->
+    <div class="tab-content" id="tab-settings">
+      <div class="settings-max">
+
+        <!-- Account -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Account
+          </div>
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="set-name" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="set-email" placeholder="your@email.com" />
+          </div>
+          <div class="field">
+            <label>Home address <span style="font-size:10px;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="text" id="set-address" placeholder="Street, City, Postcode" />
+          </div>
+          <button class="btn-primary" id="save-account-btn" style="margin-top:6px">Save account</button>
+        </div>
+
+        <!-- Security -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Password &amp; Security
+          </div>
+          <div class="pw-fields">
+            <div class="field">
+              <label>Current password</label>
+              <input type="password" id="pw-current" placeholder="••••••••" />
+            </div>
+            <div class="field">
+              <label>New password</label>
+              <input type="password" id="pw-new" placeholder="Min. 8 characters" />
+            </div>
+            <div class="field">
+              <label>Confirm new password</label>
+              <input type="password" id="pw-confirm" placeholder="Repeat new password" />
+            </div>
+          </div>
+          <button class="btn-secondary" id="change-pw-btn" style="margin-top:6px">Change password</button>
+          <div id="pw-error" style="font-size:12px;color:var(--red);margin-top:8px;min-height:16px"></div>
+        </div>
+
+        <!-- Charging Profile -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Charging Profile
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+            Controls how the CACCS algorithm balances <strong>electricity cost (α)</strong> against
+            <strong>grid congestion (β)</strong>. Your choice pre-fills the schedule calculator.
+          </p>
+          <div class="profile-row" id="set-profile-row">
+            <div class="profile-opt" data-profile="saver" data-beta="0" onclick="selectSettingsProfile(this)">
+              <div class="po-icon">💰</div>
+              <div class="po-name">Budget Saver</div>
+              <div class="po-beta">β = 0.0</div>
+              <div class="po-desc">Charge only in cheapest hours. Best for cost savings.</div>
+            </div>
+            <div class="profile-opt" data-profile="balance" data-beta="0.5" onclick="selectSettingsProfile(this)">
+              <div class="po-icon">⚖️</div>
+              <div class="po-name">Smart Balance</div>
+              <div class="po-beta">β = 0.5</div>
+              <div class="po-desc">Equal weight to cost and grid. Recommended default.</div>
+            </div>
+            <div class="profile-opt" data-profile="eco" data-beta="1.0" onclick="selectSettingsProfile(this)">
+              <div class="po-icon">🌿</div>
+              <div class="po-name">Grid Hero</div>
+              <div class="po-beta">β = 1.0</div>
+              <div class="po-desc">Prioritises grid relief. Earns most ERE certificates.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Energy Preferences -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Energy Preferences
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Electricity supplier</div>
+              <div class="settings-row-sub">Your dynamic tariff provider</div>
+            </div>
+            <div class="settings-row-ctrl">
+              <select id="set-supplier">
+                <option value="eneco">Eneco</option>
+                <option value="essent">Essent</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Default plug-in time</div>
+              <div class="settings-row-sub">When you typically arrive home</div>
+            </div>
+            <div class="settings-row-ctrl">
+              <select id="set-plugin"></select>
+            </div>
+          </div>
+          <div class="settings-row" style="border-bottom:none">
+            <div>
+              <div class="settings-row-label">Default ready-by time</div>
+              <div class="settings-row-sub">When your car needs to be ready</div>
+            </div>
+            <div class="settings-row-ctrl">
+              <select id="set-deadline"></select>
+            </div>
+          </div>
+          <button class="btn-primary" id="save-prefs-btn" style="margin-top:14px">Save preferences</button>
+        </div>
+
+        <!-- ERE Certificates -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            ERE Certificates
+          </div>
+          <div class="settings-row" style="border-bottom:none">
+            <div style="flex:1">
+              <div class="settings-row-label">Enable ERE revenue</div>
+              <div class="settings-row-sub">Earn ~€0.082/kWh via NEa 2026 smart-charging certificates</div>
+            </div>
+            <label class="toggle" id="set-ere-label">
+              <input type="checkbox" id="set-ere" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+          <div class="info-box">
+            <h4>What are ERE certificates?</h4>
+            <p>
+              <strong>Hernieuwbaar Energiebewijs voor Elektrisch Rijden (HBE-OV)</strong> are Dutch renewable energy certificates
+              earned by smart EV charging. Under the <strong>NEa 2026</strong> framework, each kWh charged during validated
+              green-energy periods earns a certificate sold to fuel suppliers who must prove renewable usage under the EU RED directive.
+            </p>
+            <p style="margin-top:8px">Requirements to earn ERE certificates:</p>
+            <div class="info-req">MID-certified smart charger (e.g. Alfen Eve Single MID, EVBOX Elvi MID)</div>
+            <div class="info-req">Dynamic electricity contract from a participating supplier (Eneco, Essent)</div>
+            <div class="info-req">NEa registration via your energy supplier (process opens Q1 2026)</div>
+            <div class="info-req">CACCS <em>Grid Hero</em> or <em>Smart Balance</em> charging profile for optimal certificate yield</div>
+            <div class="info-estimate">Estimated revenue: €10–18 per month for a typical 15,000 km/year EV driver</div>
+          </div>
+        </div>
+
+        <!-- Solar Integration -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Solar Self-Consumption
+          </div>
+          <div class="settings-row">
+            <div style="flex:1">
+              <div class="settings-row-label">Enable solar integration</div>
+              <div class="settings-row-sub">Align charging with PV generation to maximise self-consumption</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-solar" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+          <div id="set-solar-kwp-row" class="settings-row" style="display:none">
+            <div>
+              <div class="settings-row-label">Solar system size (kWp)</div>
+              <div class="settings-row-sub">Total installed capacity on your roof</div>
+            </div>
+            <div class="settings-row-ctrl">
+              <input type="number" id="set-kwp" value="4.0" step="0.5" min="0.5" max="30" />
+            </div>
+          </div>
+          <div class="info-box">
+            <h4>Why solar integration matters after 2027</h4>
+            <p>
+              The Dutch net metering scheme (<strong>saldering</strong>) is being phased out:
+            </p>
+            <div style="margin:8px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div style="background:var(--bg2);border-radius:6px;padding:8px;text-align:center;font-size:11px">
+                <strong style="display:block;font-size:14px;color:var(--yellow)">64%</strong>2025
+              </div>
+              <div style="background:var(--bg2);border-radius:6px;padding:8px;text-align:center;font-size:11px">
+                <strong style="display:block;font-size:14px;color:var(--orange)">36%</strong>2026
+              </div>
+              <div style="background:var(--bg2);border-radius:6px;padding:8px;text-align:center;font-size:11px">
+                <strong style="display:block;font-size:14px;color:var(--red)">9%</strong>2027+
+              </div>
+            </div>
+            <p>After 2027, surplus solar exported to the grid earns very little. CACCS shifts your EV charging into the solar peak window (typically 10:00–15:00), so you consume your own electricity at full retail value instead of buying from the grid.</p>
+            <div class="info-req">Typical self-consumption increase: 15–30% for a 4 kWp system</div>
+            <div class="info-req">Best combined with <em>Smart Balance</em> or <em>Grid Hero</em> profile</div>
+            <div class="info-estimate">Estimated net benefit: €15–30/month after 2027 for a 4 kWp system + EV</div>
+          </div>
+          <button class="btn-secondary" id="save-solar-btn" style="margin-top:14px">Save solar settings</button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-card settings-section">
+          <div class="settings-card-title" style="color:var(--red)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Account Actions
+          </div>
+          <div class="danger-row">
+            <button class="btn-secondary" id="export-data-btn">Export my data (GDPR)</button>
+            <button class="btn-danger" id="logout-settings-btn">Sign out</button>
+            <button class="btn-danger" id="delete-account-btn">Delete account</button>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:10px">
+            Data export downloads a JSON file containing all your account data, vehicles, and charging sessions (GDPR Article 20).
+            Account deletion is permanent and irreversible (GDPR Article 17).
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── VEHICLE DETAIL MODAL ── -->
+<div id="car-modal" style="display:none">
+  <div class="modal-overlay" onclick="closeCarModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div id="modal-brand-tag" style="font-size:13px;font-weight:700"></div>
+        <button class="modal-close-btn" onclick="closeCarModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img" class="modal-img" src="" alt="" loading="lazy" onerror="this.style.display='none'" />
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-meta" id="modal-meta"></div>
+        <div class="modal-specs" id="modal-specs"></div>
+        <div class="modal-section">
+          <div class="modal-section-label">Charging time estimates</div>
+          <table class="charge-table">
+            <thead><tr><th>Charger</th><th>0 → 80% (CACCS window)</th><th>0 → 100%</th></tr></thead>
+            <tbody id="modal-charge-rows"></tbody>
+          </table>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">CACCS smart charging</div>
+          <div id="modal-caccs-info" class="modal-desc"></div>
+        </div>
+        <div class="modal-footer" id="modal-footer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "";
+let token = localStorage.getItem("token");
+let user = JSON.parse(localStorage.getItem("user") || "null");
+let catalog = [], userVehicles = [];
+let marketChart = null, schChart = null, billChart = null;
+
+if (!token) { window.location.href = "/login"; }
+
+// ── Theme ───────────────────────────────────────────────────────────────────
+(function () {
+  const t = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  document.getElementById("dash-sun").style.display = t === "dark" ? "block" : "none";
+  document.getElementById("dash-moon").style.display = t === "light" ? "block" : "none";
+})();
+document.getElementById("dash-theme-btn").addEventListener("click", () => {
+  const n = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", n);
+  localStorage.setItem("theme", n);
+  document.getElementById("dash-sun").style.display = n === "dark" ? "block" : "none";
+  document.getElementById("dash-moon").style.display = n === "light" ? "block" : "none";
+});
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+}
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { ...authHeaders(), ...(opts.headers || {}) },
+  });
+  if (res.status === 401) { localStorage.clear(); window.location.href = "/login"; return null; }
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    const msg = Array.isArray(e.detail) ? e.detail.map(x => x.msg).join('; ') : (e.detail || "API error");
+    throw new Error(msg);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function showToast(msg, type = "ok") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+function logout() { localStorage.clear(); window.location.href = "/login"; }
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+const TITLES = { market: "Electricity Market", schedule: "Smart Schedule", bill: "Energy Bill", vehicles: "My Vehicles", settings: "Settings" };
+document.querySelectorAll(".nav-item[data-tab]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    document.getElementById("topbar-title").textContent = TITLES[btn.dataset.tab] || "";
+  });
+});
+document.getElementById("logout-btn").addEventListener("click", logout);
+
+// ── Hour dropdowns ───────────────────────────────────────────────────────────
+function fillHourSelect(el, selected) {
+  el.innerHTML = "";
+  for (let h = 0; h < 24; h++) {
+    const o = document.createElement("option");
+    o.value = h;
+    o.textContent = String(h).padStart(2, "0") + ":00";
+    if (h === selected) o.selected = true;
+    el.appendChild(o);
+  }
+}
+
+// ── Brand helpers ────────────────────────────────────────────────────────────
+const BRAND_COLORS = {
+  Tesla: '#EF4444', Volkswagen: '#2563EB', Skoda: '#16A34A',
+  Audi: '#6B7280', Cupra: '#EA580C', Hyundai: '#2563EB',
+  Kia: '#DC2626', Volvo: '#1B5E20', Renault: '#D97706',
+  BMW: '#1E40AF', Ford: '#2563EB', Peugeot: '#7C3AED',
+  MG: '#B91C1C', BYD: '#1D4ED8',
+};
+
+function effBadge(kwh) {
+  if (kwh <= 12.5) return ['A+', 'var(--green)'];
+  if (kwh <= 14.0) return ['A', '#4ADE80'];
+  if (kwh <= 16.0) return ['B', 'var(--yellow)'];
+  return ['C', 'var(--red)'];
+}
+
+// ── Load user ────────────────────────────────────────────────────────────────
+async function loadUser() {
+  try { user = await apiFetch("/api/auth/me"); } catch {}
+  if (!user) return;
+  localStorage.setItem("user", JSON.stringify(user));
+
+  const initials = user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+  document.getElementById("user-avatar").textContent = initials;
+  document.getElementById("user-name").textContent = user.name;
+  document.getElementById("user-email-disp").textContent = user.email;
+
+  // Account settings
+  document.getElementById("set-name").value = user.name || "";
+  document.getElementById("set-email").value = user.email || "";
+  document.getElementById("set-address").value = user.address || "";
+
+  // Energy preferences
+  document.getElementById("set-supplier").value = user.supplier || "eneco";
+  fillHourSelect(document.getElementById("set-plugin"), user.plugin_time ?? 18);
+  fillHourSelect(document.getElementById("set-deadline"), user.deadline ?? 7);
+
+  // Toggles
+  document.getElementById("set-ere").checked = user.ere_enabled !== false;
+  document.getElementById("set-solar").checked = !!user.solar_enabled;
+  document.getElementById("set-kwp").value = user.solar_kwp || 4.0;
+  document.getElementById("set-solar-kwp-row").style.display = user.solar_enabled ? "flex" : "none";
+
+  // Profile cards
+  const profile = user.charging_profile || "balance";
+  document.querySelectorAll("#set-profile-row .profile-opt").forEach(c => {
+    c.classList.toggle("active", c.dataset.profile === profile);
+  });
+  // Pre-fill schedule profile
+  document.querySelectorAll("#sch-profile-row .profile-opt").forEach(c => {
+    c.classList.toggle("active", c.dataset.profile === profile);
+  });
+
+  // Schedule time defaults
+  fillHourSelect(document.getElementById("sch-plugin"), user.plugin_time ?? 18);
+  fillHourSelect(document.getElementById("sch-deadline"), user.deadline ?? 7);
+}
+
+// ── Market ───────────────────────────────────────────────────────────────────
+async function loadMarket() {
+  try {
+    const sup = user?.supplier || "eneco";
+    const [priceData, statsData] = await Promise.all([
+      apiFetch(`/api/prices/today?supplier=${sup}`),
+      apiFetch("/api/dashboard/stats"),
+    ]);
+
+    const prices = priceData.prices;
+    const now = new Date().getHours();
+    const cur = prices[now];
+    const avg = prices.reduce((s, p) => s + p.retail, 0) / 24;
+    const pct = ((cur.retail - avg) / avg * 100).toFixed(0);
+
+    document.getElementById("mkt-current-price").textContent = `€${cur.retail.toFixed(3)}`;
+    document.getElementById("mkt-price-change").textContent = (pct >= 0 ? "↑" : "↓") + Math.abs(pct) + "% vs avg";
+    document.getElementById("mkt-price-change").style.color = pct < 0 ? "var(--green)" : "var(--red)";
+
+    const peak = prices.reduce((b, p) => p.retail > b.retail ? p : b, prices[0]);
+    const low = prices.reduce((b, p) => p.retail < b.retail ? p : b, prices[0]);
+    document.getElementById("mkt-peak").textContent = `€${peak.retail.toFixed(3)}`;
+    document.getElementById("mkt-peak-time").textContent = String(peak.hour).padStart(2, "0") + ":00";
+    document.getElementById("mkt-avg").textContent = `€${avg.toFixed(3)}`;
+    document.getElementById("mkt-low").textContent = `€${low.retail.toFixed(3)}`;
+    document.getElementById("mkt-low-time").textContent = String(low.hour).padStart(2, "0") + ":00";
+
+    let best = 0, bestAvg = Infinity;
+    for (let i = 0; i < 24; i++) {
+      const ba = (prices[i].retail + prices[(i+1)%24].retail + prices[(i+2)%24].retail) / 3;
+      if (ba < bestAvg) { bestAvg = ba; best = i; }
+    }
+    document.getElementById("mkt-cheapest").textContent =
+      `${String(best).padStart(2,"0")}:00 – ${String((best+3)%24).padStart(2,"0")}:00`;
+
+    const ctx = document.getElementById("market-chart");
+    if (marketChart) marketChart.destroy();
+    const colors = prices.map((p, h) => {
+      if (h === now) return "#FBBF24";
+      if (p.retail === peak.retail) return "rgba(248,113,113,0.75)";
+      if (p.retail === low.retail) return "rgba(34,211,165,0.9)";
+      return "rgba(59,130,246,0.55)";
+    });
+    marketChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels: prices.map(p => String(p.hour).padStart(2,"0")+"h"), datasets: [{ data: prices.map(p => p.retail), backgroundColor: colors, borderRadius: 3 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `€${c.parsed.y.toFixed(3)}/kWh` } } },
+        scales: {
+          y: { beginAtZero: false, ticks: { color: "#7C8FA8", callback: v => `€${v.toFixed(3)}` }, grid: { color: "rgba(128,128,128,0.07)" } },
+          x: { ticks: { color: "#7C8FA8", maxTicksLimit: 8 }, grid: { display: false } },
+        },
+      },
+    });
+
+    if (statsData) {
+      document.getElementById("stat-total-savings").textContent = `€${Math.round(statsData.total_savings_eur)}`;
+      document.getElementById("stat-month-sessions").textContent = statsData.session_count;
+      document.getElementById("stat-month-cost").textContent = `€${statsData.month_cost_eur.toFixed(2)}`;
+      document.getElementById("stat-month-savings-sub").textContent = `saved €${statsData.month_savings_eur.toFixed(2)} this month`;
+      document.getElementById("stat-total-kwh").textContent = Math.round(statsData.total_kwh);
+    }
+  } catch (e) { console.error(e); }
+}
+
+// ── Wikipedia car images ───────────────────────────────────────────────────
+const WIKI_TITLES = {
+  "Tesla Model Y": "Tesla_Model_Y",
+  "Tesla Model Y Long Range AWD": "Tesla_Model_Y",
+  "Tesla Model 3": "Tesla_Model_3",
+  "Volkswagen ID.4": "Volkswagen_ID.4",
+  "Volkswagen ID.3": "Volkswagen_ID.3",
+  "Skoda Enyaq": "%C5%A0koda_Enyaq",
+  "Audi Q4 e-tron": "Audi_Q4_e-tron",
+  "Cupra Born": "Cupra_Born",
+  "Hyundai Kona Electric": "Hyundai_Kona_Electric",
+  "Kia EV3": "Kia_EV3",
+  "Kia EV6": "Kia_EV6",
+  "Volvo EX30": "Volvo_EX30",
+  "Volvo EX40": "Volvo_EX40",
+  "Renault Megane E-Tech": "Renault_M%C3%A9gane_E-Tech",
+  "Renault 5 E-Tech": "Renault_5_(2024)",
+  "BMW iX1": "BMW_iX1",
+  "Ford Mustang Mach-E": "Ford_Mustang_Mach-E",
+  "Peugeot e-208": "Peugeot_e-208",
+  "MG4 Electric": "MG4_EV",
+  "BYD Atto 3": "BYD_Atto_3",
+};
+const _imgCache = {};
+async function fetchCarImage(modelName) {
+  if (_imgCache[modelName] !== undefined) return _imgCache[modelName];
+  const t = WIKI_TITLES[modelName] || encodeURIComponent(modelName.replace(/ /g, "_"));
+  try {
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`, { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    _imgCache[modelName] = d.thumbnail?.source || "";
+  } catch { _imgCache[modelName] = ""; }
+  return _imgCache[modelName];
+}
+async function hydrateImages(selector, modelAttr) {
+  document.querySelectorAll(selector).forEach(async wrap => {
+    const model = wrap.dataset[modelAttr];
+    if (!model) return;
+    const src = await fetchCarImage(model);
+    if (src) {
+      const ph = wrap.querySelector(".car-img-ph, .cc-img-ph");
+      const img = document.createElement("img");
+      img.className = wrap.classList.contains("cc-img-wrap") ? "cc-img" : "car-img";
+      img.src = src; img.alt = model; img.loading = "lazy";
+      img.onerror = () => img.remove();
+      if (ph) ph.replaceWith(img); else wrap.appendChild(img);
+    }
+  });
+}
+
+// ── Vehicle detail modal ───────────────────────────────────────────────────
+let _currentModalVehicle = null;
+window.openCarModal = async (vehicleData, showAddBtn = false) => {
+  _currentModalVehicle = vehicleData;
+  const m = vehicleData;
+  const bc = BRAND_COLORS[m.brand] || '#6B7280';
+  const [eff, effColor] = effBadge(m.efficiency_kwh_100km || m.efficiency_kwh_100km);
+
+  document.getElementById("modal-brand-tag").innerHTML =
+    `<span style="background:${bc}18;color:${bc};padding:3px 10px;border-radius:100px;font-size:12px">${m.brand || ''}</span>`;
+  document.getElementById("modal-title").textContent = m.model_name;
+  document.getElementById("modal-meta").innerHTML = [
+    m.year ? `<span style="background:var(--bg3);border-radius:6px;padding:2px 8px;font-size:12px">${m.year}</span>` : '',
+    `<span style="color:${effColor};font-size:12px;font-weight:600">${eff} efficiency · ${m.efficiency_kwh_100km} kWh/100 km</span>`,
+    m.price_eur ? `<span style="font-size:12px;color:var(--text-muted)">from €${m.price_eur.toLocaleString('nl-NL')}</span>` : '',
+  ].filter(Boolean).join('');
+
+  document.getElementById("modal-specs").innerHTML = [
+    `<div class="modal-spec"><div class="modal-spec-val">${m.battery_kwh} kWh</div><div class="modal-spec-label">Usable battery</div></div>`,
+    `<div class="modal-spec"><div class="modal-spec-val">${m.wltp_km} km</div><div class="modal-spec-label">WLTP range</div></div>`,
+    `<div class="modal-spec"><div class="modal-spec-val">${m.ac_power_kw} kW</div><div class="modal-spec-label">AC charging</div></div>`,
+    `<div class="modal-spec"><div class="modal-spec-val">${Math.round(m.wltp_km / m.battery_kwh * 10) / 10} km/kWh</div><div class="modal-spec-label">Driving efficiency</div></div>`,
+  ].join('');
+
+  const chargers = [[3.7,"Slow (3.7 kW)"],[7.4,"Standard (7.4 kW)"],[11,"Fast (11 kW)"],[22,"Rapid (22 kW)"]];
+  document.getElementById("modal-charge-rows").innerHTML = chargers.map(([kw, label]) => {
+    const t80 = (m.battery_kwh * 0.8 / kw).toFixed(1);
+    const t100 = (m.battery_kwh / kw).toFixed(1);
+    return `<tr><td>${label}</td><td>${t80}h</td><td>${t100}h</td></tr>`;
+  }).join('');
+
+  const annualKwh = 15000 / 100 * m.efficiency_kwh_100km;
+  const savingEst = Math.round(annualKwh * (0.32 - 0.235));
+  document.getElementById("modal-caccs-info").innerHTML =
+    `With smart CACCS scheduling, this vehicle can save approximately <strong style="color:var(--green)">€${savingEst}/year</strong>
+    vs. a fixed-rate contract (based on 15,000 km/year, Dutch average prices).
+    The ${m.ac_power_kw} kW charger gives a ${(m.battery_kwh * 0.8 / m.ac_power_kw).toFixed(1)}h
+    CACCS-optimal charging window (20→80% SoC).`;
+
+  const alreadyAdded = userVehicles.some(v => v.model_name === m.model_name);
+  document.getElementById("modal-footer").innerHTML = showAddBtn
+    ? `<button class="btn-primary" ${alreadyAdded ? 'disabled' : ''} onclick="addFromCatalog(${m.id || 0});closeCarModal()">
+        ${alreadyAdded ? '✓ Already in garage' : '+ Add to garage'}
+      </button>
+      <button class="btn-secondary" onclick="closeCarModal()">Close</button>`
+    : `<button class="btn-primary" onclick="closeCarModal()">Close</button>`;
+
+  // Load image
+  const imgEl = document.getElementById("modal-img");
+  imgEl.src = ""; imgEl.style.display = "block";
+  const src = await fetchCarImage(m.model_name);
+  if (src) imgEl.src = src; else imgEl.style.display = "none";
+
+  document.getElementById("car-modal").style.display = "block";
+  document.body.style.overflow = "hidden";
+};
+window.closeCarModal = (e) => {
+  if (e && e.target !== document.querySelector(".modal-overlay")) return;
+  document.getElementById("car-modal").style.display = "none";
+  document.body.style.overflow = "";
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeCarModal(); });
+
+// ── Schedule — window analysis + staged SoC ───────────────────────────────
+function calcWindowHours(plugin, deadline) {
+  if (deadline === plugin) return 0;
+  return deadline > plugin ? deadline - plugin : 24 - plugin + deadline;
+}
+
+function updateWindowAnalysis() {
+  const plugin = parseInt(document.getElementById("sch-plugin").value);
+  const deadline = parseInt(document.getElementById("sch-deadline").value);
+  const pmax = parseFloat(document.getElementById("sch-pmax").value) || 11;
+  const vehicleId = parseInt(document.getElementById("sch-vehicle").value);
+  const vehicle = userVehicles.find(v => v.id === vehicleId);
+  const battery = vehicle ? vehicle.battery_kwh : null;
+
+  const strip = document.getElementById("window-strip");
+  const txt = document.getElementById("window-text");
+
+  if (isNaN(plugin) || isNaN(deadline) || plugin === deadline) {
+    strip.className = "window-strip err";
+    txt.textContent = "Plug-in and ready-by times cannot be the same";
+    return;
+  }
+
+  const windowH = calcWindowHours(plugin, deadline);
+  const maxEnergy = pmax * windowH * 0.92;
+
+  if (!battery) {
+    strip.className = "window-strip ok";
+    txt.textContent = `${windowH}h window · up to ${maxEnergy.toFixed(0)} kWh deliverable at ${pmax} kW`;
+    return;
+  }
+
+  const rawCurrent = parseInt(document.getElementById("sch-current-soc").value);
+  const currentSoc = isNaN(rawCurrent) ? 20 : Math.min(99, Math.max(0, rawCurrent));
+  const maxSocGain = Math.min(100 - currentSoc, (maxEnergy / battery) * 100);
+  const maxTarget = Math.min(100, Math.ceil(currentSoc + maxSocGain));
+
+  // Update slider bounds
+  const slider = document.getElementById("soc-slider");
+  slider.min = Math.min(currentSoc + 1, 100);
+  slider.max = maxTarget;
+  if (parseInt(slider.value) < slider.min) slider.value = slider.min;
+  if (parseInt(slider.value) > maxTarget) slider.value = maxTarget;
+  document.getElementById("soc-min-tick").textContent = slider.min + "%";
+  document.getElementById("soc-max-tick").textContent = maxTarget + "%";
+  document.getElementById("soc-max-tag").textContent = `max: ${maxTarget}%`;
+
+  const canFullCharge = maxTarget >= 100;
+  const shortfall = (100 - maxTarget).toFixed(0);
+  if (maxTarget <= currentSoc + 2) {
+    strip.className = "window-strip err";
+    txt.textContent = `⚠ ${windowH}h window is too short — not enough time to charge at ${pmax} kW`;
+  } else if (canFullCharge) {
+    strip.className = "window-strip ok";
+    txt.textContent = `${windowH}h window · full charge possible (${battery} kWh at ${pmax} kW)`;
+  } else {
+    strip.className = "window-strip warn";
+    txt.textContent = `${windowH}h window · max ${maxTarget}% target (${shortfall}% unreachable — consider faster charger or longer window)`;
+  }
+
+  calcEnergyFromSoc();
+}
+
+function calcEnergyFromSoc() {
+  const vehicleId = parseInt(document.getElementById("sch-vehicle").value);
+  const vehicle = userVehicles.find(v => v.id === vehicleId);
+  const battery = vehicle ? vehicle.battery_kwh : 60;
+
+  const rawCurrent = parseInt(document.getElementById("sch-current-soc").value);
+  const currentSoc = isNaN(rawCurrent) ? 20 : Math.min(99, Math.max(0, rawCurrent));
+  const targetSoc = parseInt(document.getElementById("soc-slider").value);
+
+  const circumference = 2 * Math.PI * 54;
+  document.getElementById("soc-circle").setAttribute("stroke-dashoffset", (circumference * (1 - targetSoc / 100)).toFixed(1));
+  document.getElementById("soc-val").textContent = targetSoc + "%";
+  document.getElementById("soc-val-label").textContent = targetSoc + "%";
+
+  if (targetSoc <= currentSoc) {
+    document.getElementById("soc-hint").textContent = "Battery already at or above target.";
+    document.getElementById("sch-energy").value = "0";
+    return;
+  }
+  const pmax = parseFloat(document.getElementById("sch-pmax").value) || 11;
+  const energyNeeded = battery * (targetSoc - currentSoc) / 100 / 0.92;
+  const hours = energyNeeded / pmax;
+  document.getElementById("sch-energy").value = energyNeeded.toFixed(1);
+  document.getElementById("soc-hint").textContent =
+    `${battery} kWh · ${currentSoc}% → ${targetSoc}% · ≈${hours.toFixed(1)}h at ${pmax} kW`;
+}
+
+["sch-plugin","sch-deadline","sch-pmax","sch-vehicle","sch-current-soc"].forEach(id =>
+  document.getElementById(id).addEventListener("change", updateWindowAnalysis));
+document.getElementById("soc-slider").addEventListener("input", calcEnergyFromSoc);
+document.getElementById("sch-current-soc").addEventListener("input", updateWindowAnalysis);
+
+window.selectSchProfile = (el) => {
+  document.querySelectorAll("#sch-profile-row .profile-opt").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+};
+
+document.getElementById("sch-run-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("sch-run-btn");
+  btn.disabled = true; btn.textContent = "Computing…";
+  try {
+    const activeProf = document.querySelector("#sch-profile-row .profile-opt.active");
+    const beta = activeProf ? parseFloat(activeProf.dataset.beta) : 0.5;
+    const result = await apiFetch("/api/caccs/compute", {
+      method: "POST",
+      body: JSON.stringify({
+        energy_kwh: parseFloat(document.getElementById("sch-energy").value),
+        pmax_kw: parseFloat(document.getElementById("sch-pmax").value),
+        plugin_hour: parseInt(document.getElementById("sch-plugin").value),
+        deadline_hour: parseInt(document.getElementById("sch-deadline").value),
+        supplier: user?.supplier || "eneco",
+        beta,
+        eta: 0.92,
+      }),
+    });
+    renderSchedule(result);
+    // Pre-fill log form
+    document.getElementById("log-cost").value = result.costs.smart.toFixed(2);
+    document.getElementById("log-saving").value = Math.max(0, result.costs.fixed - result.costs.smart).toFixed(2);
+    document.getElementById("log-kwh").value = result.energy_kwh.toFixed(1);
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+  finally { btn.disabled = false; btn.textContent = "Compute CACCS Schedule"; }
+});
+
+function renderSchedule(data) {
+  const saveFixed = (data.costs.fixed - data.costs.smart).toFixed(2);
+  document.getElementById("sch-saving-banner").style.display = "flex";
+  document.getElementById("sch-saving-amount").textContent = `€${saveFixed}`;
+
+  document.getElementById("cost-fixed").textContent = `€${data.costs.fixed.toFixed(2)}`;
+  document.getElementById("cost-unc").textContent = `€${data.costs.uncontrolled.toFixed(2)}`;
+  document.getElementById("cost-po").textContent = `€${data.costs.price_only.toFixed(2)}`;
+  document.getElementById("cost-sm").textContent = `€${data.costs.smart.toFixed(2)}`;
+
+  const pmax = parseFloat(document.getElementById("sch-pmax").value);
+  document.getElementById("sch-schedule-viz").style.display = "block";
+  document.getElementById("sch-bars").innerHTML = data.schedule.map(s => {
+    const pct = Math.round((s.smart_kw / pmax) * 100);
+    const active = s.smart_kw > 0.01;
+    const cheap = s.price < 0.15;
+    return `<div class="schedule-bar-row">
+      <div class="schedule-hour-label">${String(s.hour).padStart(2,"0")}:00</div>
+      <div class="schedule-track">${active ? `<div class="schedule-fill" style="width:${pct}%;background:${cheap ? 'linear-gradient(90deg,#22D3A5,#0EA5E9)' : 'rgba(251,191,36,0.75)'}"></div>` : ""}</div>
+      <div class="schedule-kw-label" style="color:${active?'var(--text)':'var(--text-dim)'}">${active ? s.smart_kw.toFixed(1)+" kW" : "—"}</div>
+      <div class="schedule-price-label">€${s.price.toFixed(3)}</div>
+    </div>`;
+  }).join("");
+
+  const ctx = document.getElementById("sch-chart");
+  if (schChart) schChart.destroy();
+  schChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Fixed", "Uncontrolled", "Price-only", "CACCS"],
+      datasets: [{ data: [data.costs.fixed, data.costs.uncontrolled, data.costs.price_only, data.costs.smart], backgroundColor: ["rgba(124,139,163,0.65)","rgba(248,113,113,0.8)","rgba(251,191,36,0.8)","rgba(34,211,165,0.9)"], borderRadius: 5 }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `€${c.parsed.y.toFixed(2)}` } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: "#7C8FA8", callback: v => `€${v.toFixed(2)}` }, grid: { color: "rgba(128,128,128,0.07)" } },
+        x: { ticks: { color: "#7C8FA8" }, grid: { display: false } },
+      },
+    },
+  });
+}
+
+// ── Bill ──────────────────────────────────────────────────────────────────────
+async function loadBill() {
+  try {
+    const [billData, sessionsData] = await Promise.all([
+      apiFetch("/api/bill/monthly"),
+      apiFetch("/api/sessions?limit=12"),
+    ]);
+
+    const months = billData.months || [];
+    const thisMonth = months[0] || { total_cost: 0, total_savings_vs_fixed: 0, total_kwh: 0 };
+
+    document.getElementById("bill-month-cost").textContent = `€${thisMonth.total_cost.toFixed(2)}`;
+    document.getElementById("bill-month-saving").textContent = `€${thisMonth.total_savings_vs_fixed.toFixed(2)}`;
+
+    const totalKwh = months.reduce((s, m) => s + (m.total_kwh || 0), 0);
+    document.getElementById("bill-total-kwh").textContent = Math.round(totalKwh);
+    document.getElementById("bill-co2").textContent = (totalKwh * 0.15).toFixed(1) + " kg";
+
+    // Show projection if no sessions
+    if (!sessionsData || sessionsData.length === 0) {
+      renderBillProjection();
+    } else {
+      document.getElementById("bill-projection").innerHTML = "";
+    }
+
+    // Monthly chart
+    const last6 = months.slice(0, 6).reverse();
+    const ctx = document.getElementById("bill-chart");
+    if (billChart) billChart.destroy();
+    if (last6.length) {
+      billChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: last6.map(m => {
+            const [y, mo] = m.month.split("-");
+            return new Date(y, mo-1).toLocaleDateString("nl-NL", { month: "short", year: "2-digit" });
+          }),
+          datasets: [
+            { label: "Cost", data: last6.map(m => m.total_cost), backgroundColor: "rgba(59,130,246,0.6)", borderRadius: 4 },
+            { label: "Saved", data: last6.map(m => m.total_savings_vs_fixed), backgroundColor: "rgba(34,211,165,0.6)", borderRadius: 4 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: "bottom", labels: { color: "#7C8FA8", font: { size: 11 } } } },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: "#7C8FA8", callback: v => `€${v}` }, grid: { color: "rgba(128,128,128,0.07)" } },
+            x: { ticks: { color: "#7C8FA8" }, grid: { display: false } },
+          },
+        },
+      });
+    }
+
+    // Sessions list
+    const list = document.getElementById("sessions-list");
+    if (!sessionsData || !sessionsData.length) return;
+    list.innerHTML = sessionsData.map(s => `
+      <div class="session-row">
+        <div class="session-dot"></div>
+        <div class="session-info">
+          <div class="session-kwh">${s.kwh_delivered.toFixed(1)} kWh · <span style="color:var(--text-muted);font-weight:400">${s.policy}</span></div>
+          <div class="session-date">${new Date(s.session_date).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}</div>
+        </div>
+        <div>
+          <div class="session-cost-val">€${s.cost_eur.toFixed(2)}</div>
+          <div class="session-saving">saved €${s.savings_vs_fixed.toFixed(2)}</div>
+        </div>
+      </div>`).join("");
+  } catch (e) { console.error(e); }
+}
+
+function renderBillProjection() {
+  const defV = userVehicles.find(v => v.is_default) || userVehicles[0];
+  const eff = defV ? defV.efficiency_kwh_100km : 14.0;
+  const model = defV ? defV.model_name : "typical EV";
+  const monthlyKm = 1250; // 15 000 km/year
+  const monthlyKwh = monthlyKm / 100 * eff;
+  const fixedRate = 0.32;
+  const smartRate = 0.235;
+  const fixedCost = (monthlyKwh * fixedRate).toFixed(0);
+  const smartCost = (monthlyKwh * smartRate).toFixed(0);
+  const saving = (monthlyKwh * (fixedRate - smartRate)).toFixed(0);
+  const annualSaving = (monthlyKwh * (fixedRate - smartRate) * 12).toFixed(0);
+
+  document.getElementById("bill-projection").innerHTML = `
+    <div class="proj-card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">Your savings potential with SmartEV</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">
+        Projection for <strong style="color:var(--text)">${model}</strong> — ${monthlyKm} km/month · ${eff} kWh/100 km
+      </div>
+      <div style="font-size:12px;color:var(--text-muted)">Based on Dutch average driving (15,000 km/year) and current dynamic vs. fixed tariffs</div>
+      <div class="proj-grid">
+        <div class="proj-item">
+          <div class="proj-val">€${fixedCost}</div>
+          <div class="proj-label">Fixed contract/month</div>
+        </div>
+        <div class="proj-item">
+          <div class="proj-val">€${smartCost}</div>
+          <div class="proj-label">Smart charging/month</div>
+        </div>
+        <div class="proj-item">
+          <div class="proj-val" style="color:var(--green)">€${annualSaving}/yr</div>
+          <div class="proj-label">Estimated annual saving</div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted)">
+        Log your first session above after running a CACCS schedule to start tracking real savings.
+      </p>
+    </div>`;
+}
+
+document.getElementById("log-btn").addEventListener("click", async () => {
+  try {
+    await apiFetch("/api/sessions", {
+      method: "POST",
+      body: JSON.stringify({
+        kwh_delivered: parseFloat(document.getElementById("log-kwh").value),
+        cost_eur: parseFloat(document.getElementById("log-cost").value),
+        savings_vs_fixed: parseFloat(document.getElementById("log-saving").value),
+        policy: document.getElementById("log-policy").value,
+        plugin_hour: user?.plugin_time || 18,
+        deadline_hour: user?.deadline || 7,
+        supplier: user?.supplier || "eneco",
+      }),
+    });
+    showToast("✓ Session logged!");
+    await loadBill();
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+// ── Vehicles ─────────────────────────────────────────────────────────────────
+async function loadVehicles() {
+  try {
+    const [vehicles, cat] = await Promise.all([
+      apiFetch("/api/vehicles"),
+      fetch(`${API}/api/vehicles/catalog`).then(r => r.json()),
+    ]);
+    userVehicles = vehicles || [];
+    catalog = cat.vehicles || [];
+    renderGarage(userVehicles);
+    renderCatalog(catalog);
+
+    // Vehicle dropdown for schedule
+    const sel = document.getElementById("sch-vehicle");
+    sel.innerHTML = '<option value="">— no specific vehicle —</option>';
+    userVehicles.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v.id;
+      o.textContent = v.model_name;
+      if (v.is_default) o.selected = true;
+      sel.appendChild(o);
+    });
+    calcEnergyFromSoc();
+
+    // Brand filter
+    const brands = [...new Set(catalog.map(m => m.brand))].sort();
+    const brandSel = document.getElementById("cat-brand");
+    brandSel.innerHTML = '<option value="">All brands</option>';
+    brands.forEach(b => {
+      const o = document.createElement("option");
+      o.value = b; o.textContent = b;
+      brandSel.appendChild(o);
+    });
+  } catch (e) { console.error(e); }
+}
+
+function renderGarage(vehicles) {
+  const grid = document.getElementById("garage-grid");
+  if (!vehicles.length) {
+    grid.innerHTML = '<div class="empty-state"><p>No vehicles in your garage yet.</p><p style="font-size:12px">Browse the catalog below to add your EV.</p></div>';
+    return;
+  }
+  grid.innerHTML = vehicles.map(v => {
+    const [eff, effColor] = effBadge(v.efficiency_kwh_100km);
+    const bc = BRAND_COLORS[v.brand] || '#6B7280';
+    const t80 = (v.battery_kwh * 0.8 / 11).toFixed(1);
+    const catalogMatch = catalog.find(c => c.model_name === v.model_name);
+    const clickData = JSON.stringify(catalogMatch || v).replace(/"/g, '&quot;');
+    return `
+    <div class="garage-card ${v.is_default ? 'default' : ''}">
+      <div class="car-img-wrap" data-model="${v.model_name}" style="cursor:pointer" onclick='openCarModal(${JSON.stringify(catalogMatch || v)})'>
+        <div class="car-img-ph">Loading image…</div>
+      </div>
+      <div class="gc-header">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="gc-brand-tag" style="background:${bc}18;color:${bc}">${v.brand || v.model_name.split(' ')[0]}</span>
+          ${v.year ? `<span class="year-pill">${v.year}</span>` : ''}
+        </div>
+        ${v.is_default ? '<span class="default-badge">Default</span>' : ''}
+      </div>
+      <div class="gc-name" style="cursor:pointer" onclick='openCarModal(${JSON.stringify(catalogMatch || v)})'>${v.model_name}</div>
+      <div class="gc-specs">
+        <div class="gc-spec"><strong>${v.battery_kwh} kWh</strong><span>Battery</span></div>
+        <div class="gc-spec"><strong>${v.wltp_km} km</strong><span>WLTP range</span></div>
+        <div class="gc-spec"><strong>${v.ac_power_kw} kW</strong><span>AC charging</span></div>
+        <div class="gc-spec"><strong style="color:${effColor}">${eff} · ${v.efficiency_kwh_100km}</strong><span>kWh/100 km</span></div>
+      </div>
+      <div class="gc-info">20→80% in ≈${t80}h at 11 kW · <span style="color:var(--green);cursor:pointer" onclick='openCarModal(${JSON.stringify(catalogMatch || v)})'>More info →</span></div>
+      <div class="gc-actions">
+        ${!v.is_default ? `<button class="gc-btn gc-btn-default" onclick="setDefaultVehicle(${v.id})">Set as default</button>` : ''}
+        <button class="gc-btn gc-btn-remove" onclick="deleteVehicle(${v.id})">Remove</button>
+      </div>
+    </div>`;
+  }).join("");
+  hydrateImages(".car-img-wrap", "model");
+}
+
+function renderCatalog(items) {
+  const addedNames = new Set(userVehicles.map(v => v.model_name));
+  document.getElementById("catalog-grid").innerHTML = items.map(m => {
+    const [eff, effColor] = effBadge(m.efficiency_kwh_100km);
+    const bc = BRAND_COLORS[m.brand] || '#6B7280';
+    const isAdded = addedNames.has(m.model_name);
+    const shortName = m.model_name.startsWith(m.brand) ? m.model_name.slice(m.brand.length + 1) : m.model_name;
+    const mJson = JSON.stringify(m).replace(/"/g, '&quot;');
+    return `
+    <div class="catalog-card" data-brand="${m.brand}" data-name="${m.model_name.toLowerCase()}">
+      <div class="cc-img-wrap" data-model="${m.model_name}" style="cursor:pointer" onclick='openCarModal(${mJson},true)'>
+        <div class="cc-img-ph">Loading…</div>
+      </div>
+      <div class="cc-top">
+        <span class="cc-brand" style="background:${bc}18;color:${bc}">${m.brand}</span>
+        <span class="cc-year">${m.year}</span>
+      </div>
+      <div class="cc-model" style="cursor:pointer" onclick='openCarModal(${mJson},true)'>${shortName}</div>
+      <div class="cc-specs">
+        <div class="cc-spec-item"><strong>${m.battery_kwh}</strong> kWh</div>
+        <div class="cc-spec-item"><strong>${m.wltp_km}</strong> km WLTP</div>
+        <div class="cc-spec-item"><strong>${m.ac_power_kw}</strong> kW AC</div>
+        <div class="cc-spec-item eff-badge" style="color:${effColor}"><strong>${eff}</strong> ${m.efficiency_kwh_100km}</div>
+      </div>
+      <div class="cc-price">from €${m.price_eur.toLocaleString('nl-NL')} · <span style="color:var(--green);cursor:pointer;font-size:11px" onclick='openCarModal(${mJson},true)'>Details →</span></div>
+      <button class="cc-add-btn ${isAdded ? 'added' : ''}" id="cc-btn-${m.id}"
+        onclick="${isAdded ? '' : `addFromCatalog(${m.id})`}" ${isAdded ? 'disabled' : ''}>
+        ${isAdded ? '✓ In garage' : '+ Add to garage'}
+      </button>
+    </div>`;
+  }).join("");
+  hydrateImages(".cc-img-wrap", "model");
+}
+
+window.filterCatalog = () => {
+  const q = document.getElementById("cat-search").value.toLowerCase();
+  const brand = document.getElementById("cat-brand").value;
+  document.querySelectorAll(".catalog-card").forEach(c => {
+    const matchBrand = !brand || c.dataset.brand === brand;
+    const matchSearch = !q || c.dataset.name.includes(q);
+    c.style.display = matchBrand && matchSearch ? "" : "none";
+  });
+};
+
+window.sortCatalog = () => {
+  const key = document.getElementById("cat-sort").value;
+  const comparators = {
+    range: (a, b) => b.wltp_km - a.wltp_km,
+    battery: (a, b) => b.battery_kwh - a.battery_kwh,
+    efficiency: (a, b) => a.efficiency_kwh_100km - b.efficiency_kwh_100km,
+    price: (a, b) => a.price_eur - b.price_eur,
+  };
+  const sorted = [...catalog].sort(comparators[key] || (() => 0));
+  renderCatalog(sorted);
+};
+
+window.addFromCatalog = async (id) => {
+  const m = catalog.find(c => c.id === id);
+  if (!m) return;
+  const btn = document.getElementById(`cc-btn-${id}`);
+  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  try {
+    await apiFetch("/api/vehicles", {
+      method: "POST",
+      body: JSON.stringify({
+        model_name: m.model_name, brand: m.brand, year: m.year,
+        battery_kwh: m.battery_kwh, wltp_km: m.wltp_km,
+        ac_power_kw: m.ac_power_kw, efficiency_kwh_100km: m.efficiency_kwh_100km,
+        is_default: userVehicles.length === 0,
+      }),
+    });
+    showToast(`✓ ${m.model_name} added to garage!`);
+    await loadVehicles();
+  } catch (e) {
+    showToast("Error: " + e.message, "err");
+    if (btn) { btn.disabled = false; btn.textContent = "+ Add to garage"; }
+  }
+};
+
+window.setDefaultVehicle = async (id) => {
+  try {
+    await apiFetch(`/api/vehicles/${id}`, { method: "PUT", body: JSON.stringify({ is_default: true }) });
+    showToast("✓ Default vehicle updated");
+    await loadVehicles();
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+};
+
+window.deleteVehicle = async (id) => {
+  if (!confirm("Remove this vehicle from your garage?")) return;
+  try {
+    await fetch(`${API}/api/vehicles/${id}`, { method: "DELETE", headers: authHeaders() });
+    showToast("Vehicle removed");
+    await loadVehicles();
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+};
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+document.getElementById("save-account-btn").addEventListener("click", async () => {
+  try {
+    user = await apiFetch("/api/auth/me", {
+      method: "PUT",
+      body: JSON.stringify({
+        name: document.getElementById("set-name").value.trim(),
+        email: document.getElementById("set-email").value.trim(),
+        address: document.getElementById("set-address").value.trim() || null,
+      }),
+    });
+    localStorage.setItem("user", JSON.stringify(user));
+    document.getElementById("user-name").textContent = user.name;
+    document.getElementById("user-email-disp").textContent = user.email;
+    const initials = user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+    document.getElementById("user-avatar").textContent = initials;
+    showToast("✓ Account updated");
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+document.getElementById("change-pw-btn").addEventListener("click", async () => {
+  const cur = document.getElementById("pw-current").value;
+  const nw = document.getElementById("pw-new").value;
+  const cf = document.getElementById("pw-confirm").value;
+  const errEl = document.getElementById("pw-error");
+  errEl.textContent = "";
+  if (!cur || !nw || !cf) { errEl.textContent = "All fields are required."; return; }
+  if (nw !== cf) { errEl.textContent = "New passwords do not match."; return; }
+  if (nw.length < 8) { errEl.textContent = "Password must be at least 8 characters."; return; }
+  try {
+    await apiFetch("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ current_password: cur, new_password: nw }),
+    });
+    document.getElementById("pw-current").value = "";
+    document.getElementById("pw-new").value = "";
+    document.getElementById("pw-confirm").value = "";
+    showToast("✓ Password changed successfully");
+  } catch (e) { errEl.textContent = e.message; }
+});
+
+window.selectSettingsProfile = async (el) => {
+  document.querySelectorAll("#set-profile-row .profile-opt").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+  const profile = el.dataset.profile;
+  try {
+    user = await apiFetch("/api/auth/me", { method: "PUT", body: JSON.stringify({ charging_profile: profile }) });
+    localStorage.setItem("user", JSON.stringify(user));
+    // Sync schedule tab
+    document.querySelectorAll("#sch-profile-row .profile-opt").forEach(c => {
+      c.classList.toggle("active", c.dataset.profile === profile);
+    });
+    showToast("✓ Charging profile saved: " + el.querySelector(".po-name").textContent);
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+};
+
+document.getElementById("save-prefs-btn").addEventListener("click", async () => {
+  try {
+    user = await apiFetch("/api/auth/me", {
+      method: "PUT",
+      body: JSON.stringify({
+        supplier: document.getElementById("set-supplier").value,
+        plugin_time: parseInt(document.getElementById("set-plugin").value),
+        deadline: parseInt(document.getElementById("set-deadline").value),
+      }),
+    });
+    localStorage.setItem("user", JSON.stringify(user));
+    // Sync schedule defaults
+    fillHourSelect(document.getElementById("sch-plugin"), user.plugin_time);
+    fillHourSelect(document.getElementById("sch-deadline"), user.deadline);
+    showToast("✓ Preferences saved");
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+document.getElementById("set-ere").addEventListener("change", async function () {
+  try {
+    await apiFetch("/api/auth/me", { method: "PUT", body: JSON.stringify({ ere_enabled: this.checked }) });
+    showToast(this.checked ? "✓ ERE revenue enabled" : "ERE revenue disabled");
+  } catch (e) { showToast("Error: " + e.message, "err"); this.checked = !this.checked; }
+});
+
+document.getElementById("set-solar").addEventListener("change", function () {
+  document.getElementById("set-solar-kwp-row").style.display = this.checked ? "flex" : "none";
+});
+
+document.getElementById("save-solar-btn").addEventListener("click", async () => {
+  try {
+    user = await apiFetch("/api/auth/me", {
+      method: "PUT",
+      body: JSON.stringify({
+        solar_enabled: document.getElementById("set-solar").checked,
+        solar_kwp: parseFloat(document.getElementById("set-kwp").value),
+      }),
+    });
+    localStorage.setItem("user", JSON.stringify(user));
+    showToast("✓ Solar settings saved");
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+document.getElementById("export-data-btn").addEventListener("click", async () => {
+  try {
+    const data = await apiFetch("/api/auth/me/data");
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "smartev-my-data.json"; a.click();
+    URL.revokeObjectURL(url);
+    showToast("✓ Data export downloaded");
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+document.getElementById("logout-settings-btn").addEventListener("click", logout);
+
+document.getElementById("delete-account-btn").addEventListener("click", async () => {
+  if (!confirm("Permanently delete your account? This cannot be undone.")) return;
+  if (!confirm("Are you absolutely sure? All data will be erased immediately.")) return;
+  try {
+    await apiFetch("/api/auth/me", { method: "DELETE" });
+    localStorage.clear();
+    window.location.href = "/";
+  } catch (e) { showToast("Error: " + e.message, "err"); }
+});
+
+// ── Auto-refresh ─────────────────────────────────────────────────────────────
+setInterval(loadMarket, 5 * 60 * 1000);
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadUser();
+  fillHourSelect(document.getElementById("sch-plugin"), user?.plugin_time ?? 18);
+  fillHourSelect(document.getElementById("sch-deadline"), user?.deadline ?? 7);
+  fillHourSelect(document.getElementById("set-plugin"), user?.plugin_time ?? 18);
+  fillHourSelect(document.getElementById("set-deadline"), user?.deadline ?? 7);
+  await loadVehicles();
+  updateWindowAnalysis();
+  await Promise.all([loadMarket(), loadBill()]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+,0
+n_drivers_simulated,966.0
+mean_annual_cost_unc_EUR,867.0455499748009
+mean_annual_cost_po_EUR,735.3098046967597
+mean_annual_cost_smart_EUR,764.9541870562789
+mean_savings_po_pct,15.018726311280487
+mean_savings_smart_pct,11.594485202432606
+mean_savings_smart_EUR,102.09136291852192
+median_savings_smart_EUR,104.95541397601824
+mean_peak_drop_smart_pct,93.78660949360696
+n_evening_pluggers,882.0
+share_drivers_save_smart,0.9658385093167702

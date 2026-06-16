@@ -1,0 +1,417 @@
+{
+  "metadata": {
+    "sources": [
+      "[1] CBS 85237NED (CC-BY 4.0)",
+      "[2] CBS longread 2025-08 'Vertekening personenauto's naar gemeente'",
+      "[3] RVO Cijfers elektrisch vervoer",
+      "[4] EAFO Netherlands country reports 2024\u20132025",
+      "[5] EV-database.org vehicle specifications"
+    ],
+    "accessed": "2026-01-15",
+    "eindhoven_population_2024": 246443,
+    "eindhoven_car_share_NL": 0.0102
+  },
+  "nl_yearly": [
+    {
+      "year": 2020,
+      "total_cars_M": 8.68,
+      "new_reg_total": 355912,
+      "new_BEV": 72957,
+      "new_PHEV": 20011,
+      "BEV_stock": 170000,
+      "PHEV_stock": 98000,
+      "new_EV_total": 92968,
+      "BEV_share_new_pct": 20.49860639708692
+    },
+    {
+      "year": 2021,
+      "total_cars_M": 8.78,
+      "new_reg_total": 322806,
+      "new_BEV": 64500,
+      "new_PHEV": 28800,
+      "BEV_stock": 235000,
+      "PHEV_stock": 127000,
+      "new_EV_total": 93300,
+      "BEV_share_new_pct": 19.98104124458653
+    },
+    {
+      "year": 2022,
+      "total_cars_M": 8.85,
+      "new_reg_total": 309630,
+      "new_BEV": 76250,
+      "new_PHEV": 18900,
+      "BEV_stock": 311000,
+      "PHEV_stock": 145000,
+      "new_EV_total": 95150,
+      "BEV_share_new_pct": 24.626166715111587
+    },
+    {
+      "year": 2023,
+      "total_cars_M": 8.92,
+      "new_reg_total": 369830,
+      "new_BEV": 113500,
+      "new_PHEV": 22800,
+      "BEV_stock": 425000,
+      "PHEV_stock": 168000,
+      "new_EV_total": 136300,
+      "BEV_share_new_pct": 30.689776383743883
+    },
+    {
+      "year": 2024,
+      "total_cars_M": 9.0,
+      "new_reg_total": 381227,
+      "new_BEV": 132167,
+      "new_PHEV": 24522,
+      "BEV_stock": 490000,
+      "PHEV_stock": 192000,
+      "new_EV_total": 156689,
+      "BEV_share_new_pct": 34.66884559593104
+    },
+    {
+      "year": 2025,
+      "total_cars_M": 9.1,
+      "new_reg_total": 388024,
+      "new_BEV": 156139,
+      "new_PHEV": 34137,
+      "BEV_stock": 620000,
+      "PHEV_stock": 220000,
+      "new_EV_total": 190276,
+      "BEV_share_new_pct": 40.23952126672577
+    }
+  ],
+  "eindhoven_yearly": [
+    {
+      "year": 2020,
+      "total_cars": 88536,
+      "new_reg_total": 3630,
+      "new_BEV": 744,
+      "new_PHEV": 204,
+      "BEV_stock": 1734,
+      "PHEV_stock": 1000
+    },
+    {
+      "year": 2021,
+      "total_cars": 89556,
+      "new_reg_total": 3293,
+      "new_BEV": 658,
+      "new_PHEV": 294,
+      "BEV_stock": 2397,
+      "PHEV_stock": 1295
+    },
+    {
+      "year": 2022,
+      "total_cars": 90270,
+      "new_reg_total": 3158,
+      "new_BEV": 778,
+      "new_PHEV": 193,
+      "BEV_stock": 3172,
+      "PHEV_stock": 1479
+    },
+    {
+      "year": 2023,
+      "total_cars": 90984,
+      "new_reg_total": 3772,
+      "new_BEV": 1158,
+      "new_PHEV": 233,
+      "BEV_stock": 4335,
+      "PHEV_stock": 1714
+    },
+    {
+      "year": 2024,
+      "total_cars": 91800,
+      "new_reg_total": 3889,
+      "new_BEV": 1348,
+      "new_PHEV": 250,
+      "BEV_stock": 4998,
+      "PHEV_stock": 1958
+    },
+    {
+      "year": 2025,
+      "total_cars": 92820,
+      "new_reg_total": 3958,
+      "new_BEV": 1593,
+      "new_PHEV": 348,
+      "BEV_stock": 6324,
+      "PHEV_stock": 2244
+    }
+  ],
+  "ownership_split_pct": [
+    {
+      "segment": "Total fleet",
+      "private_pct": 88.0,
+      "business_pct": 12.0
+    },
+    {
+      "segment": "New BEV",
+      "private_pct": 28.0,
+      "business_pct": 72.0
+    },
+    {
+      "segment": "New PHEV",
+      "private_pct": 22.0,
+      "business_pct": 78.0
+    }
+  ],
+  "ev_models": [
+    {
+      "model": "Tesla Model Y",
+      "type": "BEV",
+      "new_2024": 19058,
+      "new_2025": 17800,
+      "battery_kWh": 75.0,
+      "wltp_km": 455,
+      "ac_kW": 11.0,
+      "dc_kW": 250,
+      "kWh_per_100km": 16.48,
+      "new_2024_2025": 36858,
+      "share_top20": 16.67767712509389
+    },
+    {
+      "model": "Volvo EX30",
+      "type": "BEV",
+      "new_2024": 10802,
+      "new_2025": 12500,
+      "battery_kWh": 64.0,
+      "wltp_km": 476,
+      "ac_kW": 11.0,
+      "dc_kW": 153,
+      "kWh_per_100km": 13.45,
+      "new_2024_2025": 23302,
+      "share_top20": 10.543795983746755
+    },
+    {
+      "model": "Tesla Model 3",
+      "type": "BEV",
+      "new_2024": 10702,
+      "new_2025": 11900,
+      "battery_kWh": 60.0,
+      "wltp_km": 513,
+      "ac_kW": 11.0,
+      "dc_kW": 250,
+      "kWh_per_100km": 11.7,
+      "new_2024_2025": 22602,
+      "share_top20": 10.227056768717025
+    },
+    {
+      "model": "Kia EV3",
+      "type": "BEV",
+      "new_2024": 7280,
+      "new_2025": 9100,
+      "battery_kWh": 81.0,
+      "wltp_km": 605,
+      "ac_kW": 11.0,
+      "dc_kW": 102,
+      "kWh_per_100km": 13.39,
+      "new_2024_2025": 16380,
+      "share_top20": 7.411697631695641
+    },
+    {
+      "model": "Volkswagen ID.4",
+      "type": "BEV",
+      "new_2024": 6940,
+      "new_2025": 6500,
+      "battery_kWh": 77.0,
+      "wltp_km": 541,
+      "ac_kW": 11.0,
+      "dc_kW": 175,
+      "kWh_per_100km": 14.23,
+      "new_2024_2025": 13440,
+      "share_top20": 6.081392928570782
+    },
+    {
+      "model": "Volkswagen ID.3",
+      "type": "BEV",
+      "new_2024": 6210,
+      "new_2025": 6800,
+      "battery_kWh": 58.0,
+      "wltp_km": 427,
+      "ac_kW": 11.0,
+      "dc_kW": 120,
+      "kWh_per_100km": 13.58,
+      "new_2024_2025": 13010,
+      "share_top20": 5.886824553623949
+    },
+    {
+      "model": "Hyundai Kona Electric",
+      "type": "BEV",
+      "new_2024": 5430,
+      "new_2025": 5800,
+      "battery_kWh": 64.0,
+      "wltp_km": 514,
+      "ac_kW": 11.0,
+      "dc_kW": 100,
+      "kWh_per_100km": 12.45,
+      "new_2024_2025": 11230,
+      "share_top20": 5.08140197826264
+    },
+    {
+      "model": "Skoda Enyaq",
+      "type": "BEV",
+      "new_2024": 5160,
+      "new_2025": 4900,
+      "battery_kWh": 77.0,
+      "wltp_km": 544,
+      "ac_kW": 11.0,
+      "dc_kW": 175,
+      "kWh_per_100km": 14.15,
+      "new_2024_2025": 10060,
+      "share_top20": 4.551995004570094
+    },
+    {
+      "model": "Renault Megane E-Tech",
+      "type": "BEV",
+      "new_2024": 4870,
+      "new_2025": 4200,
+      "battery_kWh": 60.0,
+      "wltp_km": 450,
+      "ac_kW": 22.0,
+      "dc_kW": 130,
+      "kWh_per_100km": 13.33,
+      "new_2024_2025": 9070,
+      "share_top20": 4.104035257599479
+    },
+    {
+      "model": "BMW iX1",
+      "type": "BEV",
+      "new_2024": 4290,
+      "new_2025": 4500,
+      "battery_kWh": 66.0,
+      "wltp_km": 474,
+      "ac_kW": 11.0,
+      "dc_kW": 130,
+      "kWh_per_100km": 13.92,
+      "new_2024_2025": 8790,
+      "share_top20": 3.9773395715875877
+    },
+    {
+      "model": "Peugeot e-208",
+      "type": "BEV",
+      "new_2024": 3820,
+      "new_2025": 4100,
+      "battery_kWh": 51.0,
+      "wltp_km": 410,
+      "ac_kW": 11.0,
+      "dc_kW": 100,
+      "kWh_per_100km": 12.44,
+      "new_2024_2025": 7920,
+      "share_top20": 3.5836779757649255
+    },
+    {
+      "model": "Audi Q4 e-tron",
+      "type": "BEV",
+      "new_2024": 3540,
+      "new_2025": 3600,
+      "battery_kWh": 77.0,
+      "wltp_km": 517,
+      "ac_kW": 11.0,
+      "dc_kW": 175,
+      "kWh_per_100km": 14.89,
+      "new_2024_2025": 7140,
+      "share_top20": 3.230739993303228
+    },
+    {
+      "model": "Ford Mustang Mach-E",
+      "type": "BEV",
+      "new_2024": 3210,
+      "new_2025": 2800,
+      "battery_kWh": 91.0,
+      "wltp_km": 600,
+      "ac_kW": 11.0,
+      "dc_kW": 150,
+      "kWh_per_100km": 15.17,
+      "new_2024_2025": 6010,
+      "share_top20": 2.7194324033266666
+    },
+    {
+      "model": "MG4 Electric",
+      "type": "BEV",
+      "new_2024": 2950,
+      "new_2025": 3300,
+      "battery_kWh": 64.0,
+      "wltp_km": 450,
+      "ac_kW": 11.0,
+      "dc_kW": 144,
+      "kWh_per_100km": 14.22,
+      "new_2024_2025": 6250,
+      "share_top20": 2.828028705622574
+    },
+    {
+      "model": "Cupra Born",
+      "type": "BEV",
+      "new_2024": 2620,
+      "new_2025": 2400,
+      "battery_kWh": 58.0,
+      "wltp_km": 421,
+      "ac_kW": 11.0,
+      "dc_kW": 120,
+      "kWh_per_100km": 13.78,
+      "new_2024_2025": 5020,
+      "share_top20": 2.271472656356051
+    },
+    {
+      "model": "Volvo XC60 PHEV",
+      "type": "PHEV",
+      "new_2024": 2820,
+      "new_2025": 3400,
+      "battery_kWh": 14.7,
+      "wltp_km": 78,
+      "ac_kW": 3.7,
+      "dc_kW": 0,
+      "kWh_per_100km": 18.85,
+      "new_2024_2025": 6220,
+      "share_top20": 2.8144541678355854
+    },
+    {
+      "model": "Mercedes GLC PHEV",
+      "type": "PHEV",
+      "new_2024": 2510,
+      "new_2025": 3100,
+      "battery_kWh": 31.2,
+      "wltp_km": 127,
+      "ac_kW": 11.0,
+      "dc_kW": 60,
+      "kWh_per_100km": 24.57,
+      "new_2024_2025": 5610,
+      "share_top20": 2.538438566166822
+    },
+    {
+      "model": "BMW 330e",
+      "type": "PHEV",
+      "new_2024": 2160,
+      "new_2025": 2400,
+      "battery_kWh": 12.0,
+      "wltp_km": 59,
+      "ac_kW": 3.7,
+      "dc_kW": 0,
+      "kWh_per_100km": 20.34,
+      "new_2024_2025": 4560,
+      "share_top20": 2.0633297436222295
+    },
+    {
+      "model": "Volkswagen Tiguan eHybrid",
+      "type": "PHEV",
+      "new_2024": 1890,
+      "new_2025": 2200,
+      "battery_kWh": 19.7,
+      "wltp_km": 95,
+      "ac_kW": 11.0,
+      "dc_kW": 50,
+      "kWh_per_100km": 20.74,
+      "new_2024_2025": 4090,
+      "share_top20": 1.8506619849594124
+    },
+    {
+      "model": "Toyota RAV4 Plug-in",
+      "type": "PHEV",
+      "new_2024": 1640,
+      "new_2025": 1800,
+      "battery_kWh": 18.1,
+      "wltp_km": 75,
+      "ac_kW": 6.6,
+      "dc_kW": 0,
+      "kWh_per_100km": 24.13,
+      "new_2024_2025": 3440,
+      "share_top20": 1.5565469995746646
+    }
+  ]
+}
