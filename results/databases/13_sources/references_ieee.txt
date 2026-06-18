@@ -1,0 +1,110 @@
+IEEE-STYLE REFERENCE LIST — Smart EV Charging (Team 12, v2)
+============================================================
+
+[1]  Ember Climate, "European wholesale electricity price data,"
+     2026. [Online]. Available: https://ember-climate.org/data/data-tools/
+     european-wholesale-electricity-price-data/. [Accessed: 15-Jan-2026].
+
+[2]  Statistics Netherlands (CBS), "Personenauto's actief; voertuigkenmerken,
+     regio's, 1 januari," Open Data Table 85237NED, 2025. [Online].
+     Available: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85237NED.
+     Licence: CC-BY 4.0.
+
+[3]  Statistics Netherlands (CBS), "Vertekening personenauto's naar gemeente,
+     1-1-2024," Aanvullende statistische diensten, 25-Aug-2025. [Online].
+     Available: https://www.cbs.nl/nl-nl/longread/aanvullende-statistische-
+     diensten/2025/vertekening-personenauto-s-naar-gemeente-1-1-2024.
+
+[4]  Statistics Netherlands (CBS), "Onderweg in Nederland (ODiN) 2023 —
+     Onderzoeksbeschrijving," 2024. [Online]. Available:
+     https://www.cbs.nl/nl-nl/longread/aanvullende-statistische-diensten/
+     2024/onderweg-in-nederland--odin-2023--onderzoeksbeschrijving.
+
+[5]  European Alternative Fuels Observatory (EAFO), "Netherlands country
+     report 2025 — Electric vehicle market overview," European Commission,
+     Brussels, Belgium, 2025. [Online]. Available:
+     https://alternative-fuels-observatory.ec.europa.eu/transport-mode/
+     road/netherlands.
+
+[6]  Netherlands Enterprise Agency (RVO), "Cijfers elektrisch vervoer,"
+     2025. [Online]. Available: https://www.rvo.nl/onderwerpen/duurzaam-
+     ondernemen/energie-en-milieu-innovaties/elektrisch-rijden/cijfers.
+
+[7]  EV-Database, "Electric vehicle specifications database," 2026. [Online].
+     Available: https://ev-database.org/. [Accessed: 15-Jan-2026].
+
+[8]  ElaadNL, "Open EV charging data sets," 2022. [Online]. Available:
+     https://elaad.nl/data/. License: free reuse with attribution.
+
+[9]  M. Lahariya, D. F. Benoit, and C. Develder, "Synthetic Data Generator
+     for Electric Vehicle Charging Sessions: Modeling and Evaluation Using
+     Real-World Data," Energies, vol. 13, no. 16, art. 4211, Aug. 2020.
+     doi: 10.3390/en13164211.
+
+[10] TenneT TSO B.V., "Transport- en aansluitcapaciteit hoogspanningsnet,"
+     2025. [Online]. Available: https://www.tennet.eu/nl/de-elektriciteits-
+     markt/transport-en-aansluiting/transportcapaciteit.
+
+[11] Netbeheer Nederland, "Capaciteitskaart netbeheerders," 2025. [Online].
+     Available: https://capaciteitskaart.netbeheernederland.nl/.
+
+[12] Enexis Netbeheer, "Open data — Liggingsgegevens elektriciteitsnet," v1.0,
+     7-Aug-2020. [Online]. Available: https://www.enexis.nl/over-enexis/
+     open-data.
+
+[13] ENTSO-E, "Transparency Platform — Day-Ahead Prices," 2026. [Online].
+     Available: https://transparency.entsoe.eu/. License: ENTSO-E Transparency
+     licence.
+
+[14] Eneco Energie, "Dynamische Stroom — tarieven en voorwaarden," 2026.
+     [Online]. Available: https://www.eneco.nl/dynamische-stroom/.
+
+[15] Essent, "Dynamische Energie — productinformatieblad," 2026. [Online].
+     Available: https://www.essent.nl/content/particulier/aanbod/dynamische-
+     energie.html.
+
+[16] Authority for Consumers and Markets (ACM), "Energietarieven monitor,"
+     2025. [Online]. Available: https://www.acm.nl/nl/onderwerpen/energie/
+     de-energiemarkt/energietarieven.
+
+[17] OpenChargeMap.org, "Public charging-point database — REST API v3,"
+     2026. [Online]. Available: https://openchargemap.org/site/develop/api.
+     License: Open Database License (ODbL).
+
+[18] Gemeente Eindhoven, "Open data — oplaadpalen," 2025. [Online].
+     Available: https://data.eindhoven.nl/explore/dataset/oplaadpalen/.
+
+[19] PDOK (Publieke Dienstverlening Op de Kaart), "Basisregistratie Adressen
+     en Gebouwen (BAG)," Kadaster, 2026. [Online]. Available:
+     https://www.pdok.nl/introductie/-/article/basisregistratie-adressen-en-
+     gebouwen-bag-.
+
+[20] RAI Vereniging and BOVAG, "Maandcijfers nieuwverkopen personenauto's,"
+     2026. [Online]. Available: https://www.raivereniging.nl/.
+
+[21] Nationale Agenda Laadinfrastructuur (NAL), "Laadinfra dashboard," 2025.
+     [Online]. Available: https://www.agendalaadinfrastructuur.nl/.
+
+[22] M. ElNozahy and M. Salama, "A comprehensive study of the impacts of
+     PHEVs on residential distribution networks," IEEE Trans. Sustain.
+     Energy, vol. 5, no. 1, pp. 332–342, Jan. 2014. doi: 10.1109/TSTE.2013.
+     2284573.
+
+[23] G. R. C. Mouli, P. Bauer, and M. Zeman, "System design for a solar
+     powered electric vehicle charging station for workplaces," Appl.
+     Energy, vol. 168, pp. 434–443, Apr. 2016. doi: 10.1016/j.apenergy.
+     2016.01.110.
+
+[24] K. Clement-Nyns, E. Haesen, and J. Driesen, "The impact of charging
+     plug-in hybrid electric vehicles on a residential distribution grid,"
+     IEEE Trans. Power Syst., vol. 25, no. 1, pp. 371–380, Feb. 2010.
+     doi: 10.1109/TPWRS.2009.2036481.
+
+[25] T. K. Brekken, A. Yokochi, A. von Jouanne, Z. Z. Yen, H. M. Hapke, and
+     D. A. Halamay, "Optimal energy storage sizing and control for wind
+     power applications," IEEE Trans. Sustain. Energy, vol. 2, no. 1,
+     pp. 69–77, Jan. 2011. doi: 10.1109/TSTE.2010.2066294.
+
+[26] H. Lund, B. V. Mathiesen, P. A. Østergaard et al., "Energy storage and
+     smart energy systems," Int. J. Sustain. Energy Plan. Manag., vol. 11,
+     pp. 3–14, 2016. doi: 10.5278/ijsepm.2016.11.2.

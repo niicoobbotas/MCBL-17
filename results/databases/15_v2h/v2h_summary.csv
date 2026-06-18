@@ -1,0 +1,10 @@
+,value
+Mean solar stored (kWh/yr),1298.0
+Self-consumption saving (EUR/yr),428.2
+Arbitrage saving cheap-to-peak (EUR/yr),303.7
+Backup value (EUR/yr),25.5
+"Gross V2H saving (EUR/yr, post-2027)",757.4
+"Amortised hardware (EUR/yr, 10yr)",-761.2
+Net vs doing nothing (EUR/yr),-3.7
+Gross pre-saldering-cliff (EUR/yr),462.8
+Saldering-cliff uplift (EUR/yr),294.7

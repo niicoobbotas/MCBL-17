@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart EV Charging Calculator — Team 12</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-page: #f7f7f5;
+      --bg-card: #ffffff;
+      --bg-soft: #f1efe8;
+      --bg-info: #E6F1FB;
+      --bg-success: #E1F5EE;
+      --text-primary: #2C2C2A;
+      --text-secondary: #5F5E5A;
+      --text-tertiary: #888780;
+      --text-info: #0C447C;
+      --text-success: #085041;
+      --text-danger: #A32D2D;
+      --text-warning: #854F0B;
+      --border: rgba(0,0,0,0.10);
+      --border-strong: rgba(0,0,0,0.18);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --primary: #1F3A93;
+      --accent: #1D9E75;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 500;
+      margin: 0 0 4px;
+      color: var(--primary);
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 15px;
+      font-weight: 500;
+      margin: 0 0 16px;
+      color: var(--text-primary);
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 560px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    select, input[type="range"] {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    select {
+      padding: 8px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: white;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    select:focus, input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .slider-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .slider-val { font-size: 14px; font-weight: 500; }
+    .slider-ticks {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+    .stats-bar {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      font-size: 12px; color: var(--text-secondary);
+      padding: 10px 14px;
+      background: var(--bg-soft);
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+    }
+    .stats-bar span.sep { color: var(--text-tertiary); }
+    .result-card {
+      padding: 12px 14px;
+      background: var(--bg-soft);
+      border-radius: var(--radius-md);
+    }
+    .result-label {
+      font-size: 11px; color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .result-val {
+      font-size: 22px; font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .result-note {
+      font-size: 11px; color: var(--text-tertiary);
+    }
+    .highlight {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+    }
+    .highlight.info { background: var(--bg-info); color: var(--text-info); }
+    .highlight.success { background: var(--bg-success); color: var(--text-success); }
+    .highlight-label { font-size: 12px; opacity: 0.85; margin-bottom: 4px; }
+    .highlight-val { font-size: 24px; font-weight: 500; }
+    .highlight-sub { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+    .chart-wrap { position: relative; height: 240px; margin-top: 16px; }
+    details {
+      font-size: 12px; color: var(--text-secondary);
+      margin-top: 16px; padding: 8px 0;
+    }
+    summary { cursor: pointer; padding: 4px 0; font-weight: 500; }
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>Smart EV Charging Calculator</h1>
+      <p class="subtitle">Compare annual cost of uncontrolled, price-only and CACCS scheduling under Eneco / Essent contracts · Team 12 · 4CBLW00</p>
+    </header>
+
+    <div class="card">
+      <h2>1. Your vehicle &amp; setup</h2>
+      <div class="grid-2">
+        <div>
+          <label for="ev-model">EV model</label>
+          <select id="ev-model"></select>
+        </div>
+        <div>
+          <label for="charger">Home charger</label>
+          <select id="charger"></select>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div class="slider-row">
+          <label for="km" style="margin-bottom: 0;">Annual mileage charged at home</label>
+          <span id="km-out" class="slider-val">12 000 km</span>
+        </div>
+        <input type="range" id="km" min="0" max="50000" step="500" value="12000" />
+        <div class="slider-ticks">
+          <span>0</span><span>10 000</span><span>20 000</span><span>30 000</span><span>40 000</span><span>50 000</span>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 20px;">
+        <div>
+          <label for="supplier">Supplier</label>
+          <select id="supplier">
+            <option value="eneco">Eneco</option>
+            <option value="essent">Essent</option>
+          </select>
+        </div>
+        <div>
+          <label for="plugin">Plug-in time</label>
+          <select id="plugin">
+            <option value="17">17:00 (early home)</option>
+            <option value="18" selected>18:00 (typical)</option>
+            <option value="19">19:00 (late home)</option>
+            <option value="22">22:00 (late evening)</option>
+          </select>
+        </div>
+        <div>
+          <label for="deadline">Need ready by</label>
+          <select id="deadline">
+            <option value="6">06:00</option>
+            <option value="7" selected>07:00</option>
+            <option value="8">08:00</option>
+            <option value="9">09:00</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 20px;">
+        <div style="padding: 12px 14px; background: var(--bg-soft); border-radius: var(--radius-md);">
+          <label style="margin-bottom: 8px;">
+            <input type="checkbox" id="ere-on" checked style="margin-right: 6px;" />
+            Earn ERE certificates (MID-certified charger)
+          </label>
+          <div style="font-size: 11px; color: var(--text-tertiary);">
+            Every kWh charged earns Emissiereductie-eenheden (NEa 2026).
+            Net of ~18 % inboeker commission.
+          </div>
+        </div>
+        <div style="padding: 12px 14px; background: var(--bg-soft); border-radius: var(--radius-md);">
+          <label style="margin-bottom: 8px;">
+            <input type="checkbox" id="solar-on" style="margin-right: 6px;" />
+            Has rooftop solar PV
+          </label>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+            <label for="kwp" style="font-size: 11px; margin: 0;">System size:</label>
+            <input type="range" id="kwp" min="0" max="10" step="0.5" value="4" style="flex: 1;" disabled />
+            <span id="kwp-out" style="font-size: 11px; font-weight: 500; min-width: 50px;">4.0 kWp</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-bar">
+        <span><strong id="kwh-yr">2 100</strong> kWh/yr</span>
+        <span class="sep">·</span>
+        <span><strong id="sessions">70</strong> sessions/yr</span>
+        <span class="sep">·</span>
+        <span><strong id="kwh-session">30</strong> kWh/session</span>
+        <span class="sep">·</span>
+        <span><strong id="window">13</strong> h window</span>
+      </div>
+      <div id="feasibility-warning" style="display: none; margin-top: 8px; padding: 8px 12px; background: #FAEEDA; color: #854F0B; border-radius: var(--radius-md); font-size: 12px;">
+        <strong>Charger is the bottleneck.</strong> The selected charger cannot deliver a full natural-size session in the available window, so the driver must charge more frequently. Consider a higher-power charger or a longer plug-in window.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Annual charging cost by policy</h2>
+      <div class="grid-4" id="results"></div>
+
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="highlight info">
+          <div class="highlight-label">Smart vs fixed contract</div>
+          <div class="highlight-val" id="save-fixed">€146/yr</div>
+          <div class="highlight-sub" id="save-fixed-pct">28% off the bill</div>
+        </div>
+        <div class="highlight success">
+          <div class="highlight-label">Peak-hour charging displaced</div>
+          <div class="highlight-val" id="peak-drop">~54%</div>
+          <div class="highlight-sub">CACCS, evening 17–21h</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Total annual value (savings + revenue)</h2>
+      <p style="font-size: 12px; color: var(--text-secondary); margin: -8px 0 16px;">
+        Three independent earning streams stack together. ERE certificates require
+        a MID-certified charger registered with an inboekdienstverlener (Stekker,
+        Groenbalans, ere-registratie.nl). Solar self-consumption value applies
+        post-saldering (2027+) — assuming retail vs feed-in tariff gap.
+      </p>
+
+      <div class="grid-4" id="value-stack"></div>
+
+      <div class="highlight success" style="margin-top: 16px; text-align: center;">
+        <div class="highlight-label">Total annual benefit</div>
+        <div class="highlight-val" id="total-value" style="font-size: 32px;">€340/yr</div>
+        <div class="highlight-sub" id="total-monthly">€28/month</div>
+      </div>
+
+      <div class="chart-wrap" style="height: 200px;">
+        <canvas id="chart-stack"></canvas>
+      </div>
+
+      <details>
+        <summary>Assumptions &amp; sources</summary>
+        <div style="padding: 8px 0 0; line-height: 1.6;">
+          <strong>Prices:</strong> real Ember NL hourly day-ahead 2024 (8 784 h, mean profile per hour),
+          retail formula Eneco/Essent margin + €0.10154/kWh energy tax × 1.21 BTW.
+          Effective per-session range = WLTP × 0.85 × 0.70 (SoC band).
+          Charger efficiency η = 0.92.
+          CACCS uses Eindhoven zonal-load normalised proxy with β = 0.6.
+          <br/><br/>
+          <strong>ERE (NEa 2026):</strong> 0.333 ERE per kWh on grid electricity
+          (50.5 % renewable share × 183 g/MJ × 3.6 MJ/kWh / 1000),
+          0.659 ERE per kWh on verified own renewables.
+          Market price €0.30 / ERE (Groenbalans, Mar 2026).
+          Net of 18 % inboeker commission.
+          <br/><br/>
+          <strong>Solar self-consumption (post-2027):</strong>
+          4 kWp PV typical (≈3 600 kWh/yr).
+          Passive self-consumption rate 30 %, smart matching 70 %.
+          Value per matched kWh = retail price − €0.07 feed-in tariff.
+          Salderingsregeling ends 1 Jan 2027.
+        </div>
+      </details>
+    </div>
+
+    <div class="footer">
+      Smart EV Charging — Team 12 · 4CBLW00 Multidisciplinary CBL · Eindhoven University of Technology · 2026
+    </div>
+  </div>
+
+<script>
+(function() {
+  const models = [
+    { name: "Tesla Model Y",             bat: 75, wltp: 455, ac: 11.0, eff: 16.5 },
+    { name: "Volvo EX30",                bat: 64, wltp: 476, ac: 11.0, eff: 13.4 },
+    { name: "Tesla Model 3",             bat: 60, wltp: 513, ac: 11.0, eff: 11.7 },
+    { name: "Kia EV3",                   bat: 81, wltp: 605, ac: 11.0, eff: 13.4 },
+    { name: "Volkswagen ID.4",           bat: 77, wltp: 541, ac: 11.0, eff: 14.2 },
+    { name: "Volkswagen ID.3",           bat: 58, wltp: 427, ac: 11.0, eff: 13.6 },
+    { name: "Hyundai Kona Electric",     bat: 64, wltp: 514, ac: 11.0, eff: 12.5 },
+    { name: "Skoda Enyaq",               bat: 77, wltp: 544, ac: 11.0, eff: 14.2 },
+    { name: "Renault Megane E-Tech",     bat: 60, wltp: 450, ac: 22.0, eff: 13.3 },
+    { name: "BMW iX1",                   bat: 66, wltp: 474, ac: 11.0, eff: 13.9 },
+    { name: "Peugeot e-208",             bat: 51, wltp: 410, ac: 11.0, eff: 12.4 },
+    { name: "Audi Q4 e-tron",            bat: 77, wltp: 517, ac: 11.0, eff: 14.9 },
+    { name: "Ford Mustang Mach-E",       bat: 91, wltp: 600, ac: 11.0, eff: 15.2 },
+    { name: "MG4 Electric",              bat: 64, wltp: 450, ac: 11.0, eff: 14.2 },
+    { name: "Cupra Born",                bat: 58, wltp: 421, ac: 11.0, eff: 13.8 },
+  ];
+
+  const chargers = [
+    { name: "1-phase 3.7 kW", kw: 3.7 },
+    { name: "1-phase 7.4 kW", kw: 7.4 },
+    { name: "3-phase 11 kW (standard NL)", kw: 11.0 },
+    { name: "3-phase 22 kW", kw: 22.0 },
+  ];
+
+  // Mean 2024 NL day-ahead hourly profile (Ember data, EUR/MWh)
+  const hourly_wholesale_mwh = [
+    66.3, 60.7, 57.5, 55.0, 55.4, 60.2, 71.6, 84.6, 88.4, 77.0,
+    65.6, 53.3, 47.8, 43.3, 44.4, 53.0, 67.0, 89.0, 105.0, 121.5,
+    111.4, 99.2, 88.5, 79.0,
+  ];
+
+  // Eindhoven city-wide normalised load (proxy for local congestion)
+  const L_eindhoven = [
+    0.18, 0.10, 0.05, 0.00, 0.01, 0.08, 0.25, 0.50, 0.69, 0.79,
+    0.79, 0.77, 0.77, 0.79, 0.79, 0.85, 0.95, 1.00, 0.86, 0.74,
+    0.62, 0.49, 0.35, 0.23,
+  ];
+
+  const NL_TAX = 0.10154;
+  const VAT = 0.21;
+  const SUPPLIERS = {
+    eneco:  { dyn_margin: 0.0235, fixed: 0.319, name: "Eneco" },
+    essent: { dyn_margin: 0.0220, fixed: 0.314, name: "Essent" },
+  };
+
+  // ERE constants (NEa 2026)
+  const ERE_EMISSION_FACTOR = 183;   // g CO2 / MJ
+  const ERE_MJ_PER_KWH = 3.6;
+  const NL_GRID_RENEWABLE = 0.505;   // 50.5 % renewable share, 2026
+  const ERE_PRICE = 0.30;            // €/ERE = €/kg CO2
+  const COMMISSION = 0.18;           // 18 % inboeker commission
+
+  // Solar constants (post-saldering 2027+)
+  const PV_YIELD_PER_KWP = 900;      // kWh/kWp/year in NL
+  const FEED_IN = 0.07;              // €/kWh, post-saldering feed-in tariff
+  const SC_RATE_PASSIVE = 0.30;      // 30 % passive solar self-consumption
+  const SC_RATE_SMART = 0.70;        // 70 % with smart matching
+
+  function erePerKwh(renewableShare) {
+    return renewableShare * ERE_EMISSION_FACTOR * ERE_MJ_PER_KWH / 1000;
+  }
+  function ereRevenue(annualKwh, renewableShare) {
+    const ereCount = annualKwh * erePerKwh(renewableShare);
+    return ereCount * ERE_PRICE * (1 - COMMISSION);
+  }
+  function solarSelfConsumptionValue(pvKwp, annualEvKwh, retailPrice) {
+    const annualPv = pvKwp * PV_YIELD_PER_KWP;
+    const smartMatch = Math.min(annualPv * SC_RATE_SMART, annualEvKwh);
+    const passiveMatch = Math.min(annualPv * SC_RATE_PASSIVE, annualEvKwh);
+    const delta = smartMatch - passiveMatch;
+    return delta * (retailPrice - FEED_IN);
+  }
+
+  const evSel = document.getElementById("ev-model");
+  models.forEach((m, i) => {
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = m.name + " · " + m.bat + " kWh · " + m.wltp + " km WLTP";
+    if (i === 0) o.selected = true;
+    evSel.appendChild(o);
+  });
+
+  const chSel = document.getElementById("charger");
+  chargers.forEach((c, i) => {
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = c.name;
+    if (i === 2) o.selected = true;
+    chSel.appendChild(o);
+  });
+
+  function retail(eur_mwh, margin) {
+    return (eur_mwh / 1000 + margin + NL_TAX) * (1 + VAT);
+  }
+  function fmt(n) { return Math.round(n).toLocaleString("en-US").replace(/,/g, " "); }
+
+  function scheduleUncontrolled(E, Pmax, eta, win) {
+    const x = new Array(win).fill(0);
+    let rem = E;
+    for (let h = 0; h < win; h++) {
+      if (rem <= 0) break;
+      const add = Math.min(Pmax * eta, rem);
+      x[h] = add / eta;
+      rem -= add;
+    }
+    return x;
+  }
+
+  function schedulePriceOnly(E, Pmax, eta, win, p) {
+    const x = new Array(win).fill(0);
+    const order = p.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]);
+    let rem = E;
+    for (const [, h] of order) {
+      if (rem <= 0) break;
+      const add = Math.min(Pmax * eta, rem);
+      x[h] = add / eta;
+      rem -= add;
+    }
+    return x;
+  }
+
+  function scheduleSmart(E, Pmax, eta, win, p, L, Lcap, beta, step) {
+    const x = new Array(win).fill(0);
+    let rem = E;
+    let iter = 0;
+    while (rem > 1e-6 && iter < 10000) {
+      iter++;
+      const chunk = Math.min(step, rem);
+      const delta = chunk / eta;
+      let best = -1, bestCost = Infinity;
+      for (let h = 0; h < win; h++) {
+        if (x[h] + delta > Pmax + 1e-6) continue;
+        const oldPen = Math.max(0, L[h] + x[h] / Pmax - Lcap) ** 2;
+        const newPen = Math.max(0, L[h] + (x[h] + delta) / Pmax - Lcap) ** 2;
+        const c = p[h] * delta + beta * (newPen - oldPen);
+        if (c < bestCost) { bestCost = c; best = h; }
+      }
+      if (best < 0) break;
+      x[best] += delta;
+      rem -= chunk;
+    }
+    return x;
+  }
+
+  function computeAnnualCost(model, charger, kmYr, supplier, plugin, deadline) {
+    const eta = 0.92;
+    const annual_kwh = kmYr * model.eff / 100 / eta;          // grid kWh needed per year
+    const effective_range = model.wltp * 0.85 * 0.70;
+    const Pmax = Math.min(charger.kw, model.ac);
+    const win = deadline > plugin ? deadline - plugin : (24 - plugin) + deadline;
+    const maxDeliverable = win * Pmax * eta;                  // max kWh delivered per session
+
+    // FEASIBILITY: if the charger can't fill the natural session size in the
+    // available window, the realistic outcome is that the driver charges more
+    // often (smaller, more frequent sessions) — NOT that they receive less
+    // energy. So we compute sessions/year from whichever is binding:
+    //   - charger capacity per session (maxDeliverable)
+    //   - vehicle range between sessions
+    const naturalSessions = Math.max(1, Math.round(kmYr / effective_range));
+    const kwhNatural = annual_kwh / naturalSessions;
+
+    let sessions, kwhSession, feasibilityClamped = false;
+    if (kwhNatural <= maxDeliverable * 0.99) {
+      sessions = naturalSessions;
+      kwhSession = kwhNatural;
+    } else {
+      // Charger is the bottleneck — increase session frequency
+      kwhSession = maxDeliverable * 0.99;
+      sessions = Math.max(1, Math.ceil(annual_kwh / kwhSession));
+      kwhSession = annual_kwh / sessions;                     // re-balance evenly
+      feasibilityClamped = true;
+    }
+
+    const p_clock = hourly_wholesale_mwh.map(v => retail(v, SUPPLIERS[supplier].dyn_margin));
+    const p_win = [];
+    const L_win = [];
+    for (let i = 0; i < win; i++) {
+      const h = (plugin + i) % 24;
+      p_win.push(p_clock[h]);
+      L_win.push(L_eindhoven[h]);
+    }
+
+    const E = kwhSession;
+    const x_unc = scheduleUncontrolled(E, Pmax, eta, win);
+    const x_po  = schedulePriceOnly(E, Pmax, eta, win, p_win);
+    const x_sm  = scheduleSmart(E, Pmax, eta, win, p_win, L_win, 0.6, 0.6, 0.25);
+
+    const costSession = (x) => x.reduce((s, v, h) => s + v * p_win[h], 0);
+    const peakKwh = (x) => x.reduce((s, v, h) => {
+      const clock = (plugin + h) % 24;
+      return (clock >= 17 && clock <= 21) ? s + v : s;
+    }, 0);
+
+    return {
+      kwhSession, sessions, annual_kwh, window: win,
+      Pmax_effective: Pmax,
+      feasibilityClamped,
+      cost_unc: costSession(x_unc) * sessions,
+      cost_po:  costSession(x_po)  * sessions,
+      cost_sm:  costSession(x_sm)  * sessions,
+      cost_fix: annual_kwh * SUPPLIERS[supplier].fixed,
+      peak_unc: peakKwh(x_unc) * sessions,
+      peak_sm:  peakKwh(x_sm)  * sessions,
+    };
+  }
+
+  let chart = null;
+  let chartStack = null;
+
+  function recompute() {
+    const model = models[parseInt(evSel.value)];
+    const charger = chargers[parseInt(chSel.value)];
+    const kmYr = parseInt(document.getElementById("km").value);
+    const supplier = document.getElementById("supplier").value;
+    const plugin = parseInt(document.getElementById("plugin").value);
+    const deadline = parseInt(document.getElementById("deadline").value);
+
+    document.getElementById("km-out").textContent = fmt(kmYr) + " km";
+
+    const r = computeAnnualCost(model, charger, kmYr, supplier, plugin, deadline);
+
+    document.getElementById("kwh-yr").textContent = fmt(r.annual_kwh);
+    document.getElementById("sessions").textContent = r.sessions;
+    document.getElementById("kwh-session").textContent = fmt(r.kwhSession);
+    document.getElementById("window").textContent = r.window;
+    document.getElementById("feasibility-warning").style.display =
+      r.feasibilityClamped ? "block" : "none";
+
+    const cards = [
+      { label: "Fixed",         val: r.cost_fix, color: "var(--text-secondary)", note: "no shifting" },
+      { label: "Uncontrolled",  val: r.cost_unc, color: "var(--text-danger)",    note: "dynamic, plug-and-go" },
+      { label: "Price-only",    val: r.cost_po,  color: "var(--text-warning)",   note: "cheapest hours" },
+      { label: "Smart (CACCS)", val: r.cost_sm,  color: "var(--text-success)",   note: "+ grid relief" },
+    ];
+    document.getElementById("results").innerHTML = cards.map(c => `
+      <div class="result-card">
+        <div class="result-label">${c.label}</div>
+        <div class="result-val" style="color: ${c.color};">€${fmt(c.val)}</div>
+        <div class="result-note">${c.note}</div>
+      </div>
+    `).join("");
+
+    const saveFixed = r.cost_fix - r.cost_sm;
+    const pctFixed = r.cost_fix > 0 ? (saveFixed / r.cost_fix * 100) : 0;
+    document.getElementById("save-fixed").textContent = "€" + fmt(saveFixed) + "/yr";
+    document.getElementById("save-fixed-pct").textContent = pctFixed.toFixed(0) + "% off the bill";
+
+    const peakDrop = r.peak_unc > 0.1 ? (1 - r.peak_sm / r.peak_unc) * 100 : 0;
+    document.getElementById("peak-drop").textContent = peakDrop.toFixed(0) + "%";
+
+    drawChart(r);
+
+    // ---- Value stack: dynamic + ERE + solar ----
+    const ereOn = document.getElementById("ere-on").checked;
+    const solarOn = document.getElementById("solar-on").checked;
+    const kwp = parseFloat(document.getElementById("kwp").value);
+
+    const retailPrice = SUPPLIERS[supplier].fixed;
+    const dynamicSave = r.cost_fix - r.cost_sm;
+
+    let ereValue = 0;
+    if (ereOn) {
+      if (solarOn) {
+        // Portion charged from solar earns the higher 'own renewables' ERE rate
+        const annualPv = kwp * PV_YIELD_PER_KWP;
+        const solarKwh = Math.min(annualPv * SC_RATE_SMART, r.annual_kwh);
+        const gridKwh = r.annual_kwh - solarKwh;
+        ereValue = ereRevenue(solarKwh, 1.0) + ereRevenue(gridKwh, NL_GRID_RENEWABLE);
+      } else {
+        ereValue = ereRevenue(r.annual_kwh, NL_GRID_RENEWABLE);
+      }
+    }
+
+    const solarValue = solarOn
+      ? solarSelfConsumptionValue(kwp, r.annual_kwh, retailPrice)
+      : 0;
+
+    const totalValue = dynamicSave + ereValue + solarValue;
+
+    const stackCards = [
+      { label: "Dynamic-prices saving",
+        val: dynamicSave, color: "var(--text-info)",
+        note: "smart vs fixed contract" },
+      { label: "ERE certificates",
+        val: ereValue, color: "var(--text-success)",
+        note: ereOn ? "MID charger, net of 18% commission" : "disabled" },
+      { label: "Solar self-consumption",
+        val: solarValue, color: "var(--text-warning)",
+        note: solarOn ? `+${kwp.toFixed(1)} kWp PV, post-saldering` : "no solar" },
+      { label: "Total annual value",
+        val: totalValue, color: "var(--text-primary)",
+        note: "combined yearly benefit" },
+    ];
+    document.getElementById("value-stack").innerHTML = stackCards.map(c => `
+      <div class="result-card">
+        <div class="result-label">${c.label}</div>
+        <div class="result-val" style="color: ${c.color};">€${fmt(c.val)}</div>
+        <div class="result-note">${c.note}</div>
+      </div>
+    `).join("");
+
+    document.getElementById("total-value").textContent = "€" + fmt(totalValue) + "/yr";
+    document.getElementById("total-monthly").textContent = "€" + fmt(totalValue / 12) + "/month";
+
+    drawStackChart({ dynamicSave, ereValue, solarValue });
+  }
+
+  function drawStackChart(s) {
+    const ctx = document.getElementById("chart-stack");
+    if (chartStack) chartStack.destroy();
+    chartStack = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Annual value"],
+        datasets: [
+          { label: "Dynamic-prices saving", data: [s.dynamicSave],
+            backgroundColor: "#0C447C" },
+          { label: "ERE certificates",      data: [s.ereValue],
+            backgroundColor: "#1D9E75" },
+          { label: "Solar self-consumption", data: [s.solarValue],
+            backgroundColor: "#EF9F27" },
+        ],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 11 } } },
+          tooltip: { callbacks: { label: (c) => c.dataset.label + ": €" + fmt(c.parsed.x) } },
+        },
+        scales: {
+          x: { stacked: true, beginAtZero: true,
+               ticks: { color: "#5F5E5A", callback: (v) => "€" + fmt(v) },
+               grid: { color: "rgba(0,0,0,0.08)" } },
+          y: { stacked: true, ticks: { display: false }, grid: { display: false } },
+        },
+      },
+    });
+  }
+
+  function drawChart(r) {
+    const ctx = document.getElementById("chart");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Fixed", "Uncontrolled (dynamic)", "Price-only", "Smart (CACCS)"],
+        datasets: [{
+          data: [r.cost_fix, r.cost_unc, r.cost_po, r.cost_sm],
+          backgroundColor: ["#888780", "#E24B4A", "#EF9F27", "#1D9E75"],
+          borderRadius: 6,
+          barThickness: 60,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: (ctx) => "€" + fmt(ctx.parsed.y) + " per year" },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#5F5E5A", callback: (v) => "€" + fmt(v) },
+            grid: { color: "rgba(0,0,0,0.08)" },
+          },
+          x: {
+            ticks: { color: "#5F5E5A", font: { size: 11 } },
+            grid: { display: false },
+          },
+        },
+      },
+    });
+  }
+
+  // Wire up controls
+  ["ev-model", "charger", "km", "supplier", "plugin", "deadline"].forEach(id => {
+    document.getElementById(id).addEventListener("input", recompute);
+    document.getElementById(id).addEventListener("change", recompute);
+  });
+
+  // ERE + solar controls
+  document.getElementById("ere-on").addEventListener("change", recompute);
+  document.getElementById("solar-on").addEventListener("change", function() {
+    document.getElementById("kwp").disabled = !this.checked;
+    recompute();
+  });
+  document.getElementById("kwp").addEventListener("input", function() {
+    document.getElementById("kwp-out").textContent =
+      parseFloat(this.value).toFixed(1) + " kWp";
+    recompute();
+  });
+
+  recompute();
+})();
+</script>
+</body>
+</html>

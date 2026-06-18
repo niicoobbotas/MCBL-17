@@ -320,6 +320,29 @@
     /* ── CALC RESULTS hidden until populated ── */
     #calc-results{display:none}
     #calc-results.visible{display:block}
+
+    /* ── MOBILE NAV ── */
+    .hamburger{display:none;width:38px;height:38px;border-radius:9px;border:1px solid var(--border-b);background:var(--bg2);color:var(--text);cursor:pointer;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+    .hamburger:hover{background:var(--bg3)}
+    .mobile-menu{display:none;flex-direction:column;border-top:1px solid var(--border);background:var(--bg2);padding:8px 16px 16px}
+    .mobile-menu.open{display:flex}
+    .mob-link{padding:13px 8px;font-size:15px;font-weight:500;color:var(--tm);border-bottom:1px solid var(--border);display:block;transition:color .15s}
+    .mob-link:hover{color:var(--text)}
+    .mob-ctas{display:flex;gap:8px;margin-top:14px}
+    @media(max-width:768px){
+      .hamburger{display:flex}
+      .nav-links{display:none !important}
+      .nav-signin,.nav-cta{display:none}
+    }
+    @media(max-width:500px){
+      .fc1,.fc2{display:none}
+      .hl-grid{grid-template-columns:1fr 1fr}
+      .hero h1{font-size:30px}
+      .hero-sub{font-size:15px}
+    }
+
+    /* ── FORECAST BOARD TABS ── */
+    .fcast-tab:hover{opacity:.88}
   </style>
 </head>
 <body>
@@ -333,7 +356,7 @@
       </div>
       SmartEV
     </a>
-    <nav class="nav-links">
+    <nav class="nav-links" id="nav-links">
       <a href="#how" class="nav-link">How it works</a>
       <a href="#features" class="nav-link">Features</a>
       <a href="/technology" class="nav-link">Technology</a>
@@ -346,8 +369,24 @@
         <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
       </button>
-      <a href="/login" class="btn-s" style="padding:9px 16px;font-size:14px">Sign in</a>
-      <a href="/register" class="btn-p" style="padding:9px 16px;font-size:14px">Get started free</a>
+      <a href="/login" class="btn-s nav-signin" style="padding:9px 16px;font-size:14px">Sign in</a>
+      <a href="/register" class="btn-p nav-cta" style="padding:9px 16px;font-size:14px">Get started free</a>
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <svg class="ham-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="ham-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <a href="#how" class="mob-link" onclick="closeMobileMenu()">How it works</a>
+    <a href="#features" class="mob-link" onclick="closeMobileMenu()">Features</a>
+    <a href="/technology" class="mob-link">Technology</a>
+    <a href="/app" class="mob-link">Mobile app</a>
+    <a href="#reviews" class="mob-link" onclick="closeMobileMenu()">Reviews</a>
+    <a href="#pricing" class="mob-link" onclick="closeMobileMenu()">Pricing</a>
+    <div class="mob-ctas">
+      <a href="/login" class="btn-s" style="flex:1;justify-content:center;font-size:14px;text-align:center">Sign in</a>
+      <a href="/register" class="btn-p" style="flex:1;justify-content:center;font-size:14px;text-align:center">Get started</a>
     </div>
   </div>
 </nav>
@@ -390,14 +429,15 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>
         </div>
         <div>
-          <div class="fc-label">Tonight's saving</div>
-          <div class="fc-val green">€4.20</div>
+          <div class="fc-label">30 kWh charged overnight</div>
+          <div class="fc-val green" id="fc-saving">€—</div>
+          <div style="font-size:10px;color:var(--td);margin-top:2px">vs charging now</div>
         </div>
       </div>
       <div class="float-card fc2">
         <div>
-          <div class="fc-label">Best charge window</div>
-          <div class="fc-val">02:00 – 05:00</div>
+          <div class="fc-label">Best charge window tonight</div>
+          <div class="fc-val" id="fc-window">—</div>
         </div>
       </div>
     </div>
@@ -547,8 +587,8 @@
 <!-- ── APP SECTION ── -->
 <section class="app-sec sec">
   <div class="container app-inner">
-    <div class="app-img">
-      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80" alt="EV charging" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#DCFCE7,#A7F3D0)'">
+    <div class="app-img"> 
+      <img src="https://images.unsplash.com/photo-1760531932521-8eb5a064dbca?auto=format&fit=crop&w=600&q=80" alt="Person using SmartEV app on smartphone" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#DCFCE7,#A7F3D0)'">
       <div class="app-img-overlay"></div>
     </div>
     <div>
@@ -558,7 +598,9 @@
 
       <div class="store-badges">
         <div class="store-badge">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:var(--tm)">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
           <div>
             <div class="sb-text">Download on the</div>
             <div class="sb-name">App Store</div>
@@ -566,7 +608,9 @@
           </div>
         </div>
         <div class="store-badge">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 20.29l6.94-6.94M3 3.71l6.94 6.94M21 12H9M16.06 6.06L21 12l-4.94 5.94"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:var(--tm)">
+            <path d="M3.18 23.76c.29.16.64.19.98.06l12.39-7.17-2.8-2.8-10.57 9.91zM.54 2.1C.2 2.4 0 2.88 0 3.5v17c0 .62.2 1.1.54 1.4l.08.07 9.52-9.52v-.22L.62 2.03l-.08.07zM20.4 10.37l-2.8-1.62-3.15 3.15 3.15 3.15 2.83-1.63c.8-.47.8-1.56-.03-2.05zM3.18.24L15.57 7.41l-2.8 2.8L2.2.3c.28-.19.67-.22.98-.06z"/>
+          </svg>
           <div>
             <div class="sb-text">Get it on</div>
             <div class="sb-name">Google Play</div>
@@ -635,7 +679,13 @@
     <p class="sec-sub">Enter your session parameters — the algorithm computes the optimal schedule in real time using today's actual NL market data.</p>
     <div class="calc-wrap">
       <div class="calc-form">
-        <div class="fg"><label>Energy needed (kWh)</label><input type="number" id="calc-energy" value="30" min="1" max="100"/></div>
+        <div class="fg"><label>Energy needed</label>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border-b);border-radius:8px;font-size:14px;">
+            <span style="font-weight:700;font-size:16px;">30 kWh</span>
+            <span style="font-size:12px;color:var(--td)">typical overnight session</span>
+          </div>
+          <input type="hidden" id="calc-energy" value="30">
+        </div>
         <div class="fg">
           <label>Charger power</label>
           <select id="calc-pmax">
@@ -710,13 +760,13 @@
       <div class="calc-out">
         <div id="calc-results">
           <div class="cres-grid">
-            <div class="cres"><div class="cres-l">Fixed contract</div><div class="cres-v" id="res-fixed">—</div></div>
-            <div class="cres"><div class="cres-l">Uncontrolled</div><div class="cres-v red" id="res-unc">—</div></div>
-            <div class="cres"><div class="cres-l">Price-only</div><div class="cres-v yellow" id="res-po">—</div></div>
-            <div class="cres"><div class="cres-l">CACCS Smart</div><div class="cres-v green" id="res-sm">—</div></div>
+            <div class="cres"><div class="cres-l">Fixed-rate tariff</div><div class="cres-v" id="res-fixed">—</div></div>
+            <div class="cres"><div class="cres-l">Charge immediately</div><div class="cres-v red" id="res-unc">—</div></div>
+            <div class="cres"><div class="cres-l">Cheapest hours only</div><div class="cres-v yellow" id="res-po">—</div></div>
+            <div class="cres"><div class="cres-l">CACCS Smart Schedule</div><div class="cres-v green" id="res-sm">—</div></div>
           </div>
           <div class="hl-grid">
-            <div class="hl g"><div class="hl-l">Saved vs fixed contract</div><div class="hl-v" id="res-save-fixed">—</div></div>
+            <div class="hl g"><div class="hl-l">Saved vs fixed-rate tariff</div><div class="hl-v" id="res-save-fixed">—</div></div>
             <div class="hl b"><div class="hl-l">Evening-peak displaced</div><div class="hl-v" id="res-peak">—</div></div>
           </div>
           <div class="chart-wrap"><canvas id="calc-chart"></canvas></div>
@@ -728,6 +778,21 @@
           <span style="font-size:14px">Hit "Run CACCS Algorithm" to see today's optimal schedule</span>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 3-DAY PRICE FORECAST BOARD ── -->
+<section class="sec" style="background:var(--bg2);padding-top:0;padding-bottom:64px">
+  <div class="container">
+    <div style="margin-bottom:20px">
+      <div class="sec-label" style="margin-bottom:6px">Live price log</div>
+      <h3 style="font-size:20px;font-weight:800;letter-spacing:-.02em">3-day electricity price outlook</h3>
+      <p style="font-size:14px;color:var(--tm);margin-top:4px">EPEX SPOT day-ahead prices + statistical forecast. Click a day to explore the full 24-hour profile.</p>
+    </div>
+    <div id="forecast-tabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"></div>
+    <div id="forecast-board" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rl);padding:24px;min-height:180px">
+      <div style="text-align:center;padding:40px;color:var(--td);font-size:14px">Loading price data…</div>
     </div>
   </div>
 </section>
@@ -869,7 +934,7 @@
         <div class="p-tier">Pro</div>
         <div class="p-price"><sup>€</sup>3</div>
         <div class="p-per">per month — cancel any time</div>
-        <div class="p-desc">Unlock ERE certificates, solar matching and unlimited vehicles.</div>
+        <div class="p-desc">For individual drivers who want every saving: ERE certificate income, solar self-consumption matching, and no vehicle limit.</div>
         <ul class="p-feats">
           <li><span class="p-ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></span> Everything in Starter</li>
           <li><span class="p-ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></span> ERE auto-registration (NEa)</li>
@@ -885,7 +950,7 @@
         <div class="p-tier">Fleet / B2B</div>
         <div class="p-price">Custom</div>
         <div class="p-per">contact us</div>
-        <div class="p-desc">Workplace fleets, lease-company integration and grid-operator reporting.</div>
+        <div class="p-desc">For businesses managing multiple EVs: consolidated cost reporting, Enexis grid compliance, and white-label options.</div>
         <ul class="p-feats">
           <li><span class="p-ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></span> Up to 20 vehicles</li>
           <li><span class="p-ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></span> Lease-company API</li>
@@ -1005,13 +1070,118 @@ async function loadTicker() {
       if (a < bestA) { bestA = a; best = i; }
     }
     document.getElementById("tick-window").textContent = `${String(best).padStart(2,"0")}:00–${String((best+3)%24).padStart(2,"0")}:00`;
+    // populate hero float cards
+    const saving30 = (prices[best].retail - cur) * 30;
+    const fcSaving = document.getElementById("fc-saving");
+    if (fcSaving) fcSaving.textContent = (saving30 > 0 ? "+" : "") + "€" + saving30.toFixed(2);
+    const fcWindow = document.getElementById("fc-window");
+    if (fcWindow) fcWindow.textContent = `${String(best).padStart(2,"0")}:00 – ${String((best+3)%24).padStart(2,"0")}:00`;
   } catch {
     document.getElementById("tick-current").textContent = "€0.09/kWh";
     document.getElementById("tick-pct").textContent = "−9%";
     document.getElementById("tick-window").textContent = "03:00–06:00";
+    const fcSaving = document.getElementById("fc-saving");
+    if (fcSaving) fcSaving.textContent = "+€3.80";
+    const fcWindow = document.getElementById("fc-window");
+    if (fcWindow) fcWindow.textContent = "03:00 – 06:00";
   }
 }
 loadTicker();
+
+/* ── 3-DAY FORECAST BOARD ── */
+let _forecastDays = [];
+
+function renderForecastDay(idx) {
+  const board = document.getElementById("forecast-board");
+  if (!board || !_forecastDays[idx]) return;
+  const day = _forecastDays[idx];
+  const prices = day.prices_eur_kwh;
+  const avg = prices.reduce((s,p)=>s+p,0)/prices.length;
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const minH = prices.indexOf(min);
+  const maxH = prices.indexOf(max);
+  const maxBar = max || 0.5;
+  const tag = day.is_forecast
+    ? `<span style="font-size:11px;font-weight:600;color:var(--td);background:var(--bg2);border:1px solid var(--border-b);padding:3px 9px;border-radius:5px;margin-left:8px">Forecast</span>`
+    : `<span style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:3px 9px;border-radius:5px;margin-left:8px;display:inline-flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>Live EPEX</span>`;
+  const bars = prices.map((p,h) => {
+    const pct = maxBar > 0 ? (p / maxBar) * 100 : 0;
+    const isMin = h === minH, isMax = h === maxH;
+    const col = isMin ? "var(--accent)" : isMax ? "#EF4444" : "var(--border-b)";
+    const showLabel = h % 6 === 0;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;cursor:default" title="${String(h).padStart(2,'0')}:00  €${p.toFixed(3)}/kWh">
+      <div style="width:max(2px,90%);background:${col};border-radius:3px 3px 0 0;height:${Math.max(3, pct * 0.95)}px;opacity:${isMin||isMax ? 1 : 0.65};transition:all .3s"></div>
+      <div style="font-size:9px;color:var(--td);margin-top:3px;height:12px;line-height:12px">${showLabel ? String(h).padStart(2,'0') : ''}</div>
+    </div>`;
+  }).join("");
+  board.innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="display:flex;align-items:center">
+          <span style="font-size:18px;font-weight:800;letter-spacing:-.02em">${day.label}</span>${tag}
+        </div>
+        <div style="font-size:12px;color:var(--td);margin-top:5px">${day.is_forecast ? 'Statistical + weather forecast (Open-Meteo, Eindhoven)' : 'Source: EnergyZero · EPEX SPOT NL · Eneco dynamic formula incl. energiebelasting + BTW'}</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;text-align:center">
+          <div style="font-size:22px;font-weight:800">€${avg.toFixed(3)}</div>
+          <div style="font-size:10px;color:var(--td);margin-top:3px">daily avg / kWh</div>
+        </div>
+        <div style="background:var(--accent-light);border-radius:10px;padding:12px 18px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">€${min.toFixed(3)}</div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px">cheapest ${String(minH).padStart(2,'0')}:00</div>
+        </div>
+        <div style="background:rgba(239,68,68,.07);border-radius:10px;padding:12px 18px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:#EF4444">€${max.toFixed(3)}</div>
+          <div style="font-size:10px;color:#EF4444;margin-top:3px">peak ${String(maxH).padStart(2,'0')}:00</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:1px;height:140px;padding-bottom:16px">
+      ${bars}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;font-size:10px;color:var(--td)">
+      <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
+    </div>`;
+  // Highlight active tab
+  document.querySelectorAll(".fcast-tab").forEach((btn, i) => {
+    const active = i === idx;
+    btn.style.background = active ? "var(--accent)" : "var(--bg2)";
+    btn.style.color = active ? "#fff" : "var(--tm)";
+    btn.style.borderColor = active ? "var(--accent)" : "var(--border-b)";
+  });
+}
+
+async function loadForecastBoard() {
+  const board = document.getElementById("forecast-board");
+  const tabs = document.getElementById("forecast-tabs");
+  if (!board) return;
+  try {
+    const res = await fetch(`${API}/api/prices/forecast?days=3&supplier=eneco`);
+    if (!res.ok) throw new Error();
+    const { days } = await res.json();
+    if (!days || !days.length) throw new Error();
+    _forecastDays = days.map(day => {
+      const isToday = day.date === new Date().toISOString().slice(0,10);
+      return {
+        ...day,
+        prices_eur_kwh: day.prices_eur_kwh || day.prices_eur_mwh.map(p => p/1000),
+        label: isToday ? "Today" : new Date(day.date + "T12:00:00").toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),
+        tab_label: isToday ? "Today" : new Date(day.date + "T12:00:00").toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"}),
+      };
+    });
+    if (tabs) {
+      tabs.innerHTML = _forecastDays.map((day, i) =>
+        `<button class="fcast-tab" onclick="renderForecastDay(${i})" style="padding:9px 20px;border-radius:10px;border:1.5px solid ${i===0?'var(--accent)':'var(--border-b)'};background:${i===0?'var(--accent)':'var(--bg2)'};color:${i===0?'#fff':'var(--tm)'};font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s">${day.tab_label}${day.is_forecast?`<span style="font-size:10px;font-weight:500;opacity:.7">forecast</span>`:''}</button>`
+      ).join("");
+    }
+    renderForecastDay(0);
+  } catch {
+    if (board) board.innerHTML = `<div style="text-align:center;padding:48px;color:var(--td);font-size:14px">Price data unavailable. Run <code>price_logger.py</code> to seed local price files.</div>`;
+  }
+}
+loadForecastBoard();
 
 /* ── CACCS CALCULATOR ── */
 /* ── GDPR COOKIE BANNER ── */
@@ -1076,7 +1246,7 @@ function renderCalc(data) {
   calcChart = new Chart(document.getElementById("calc-chart"), {
     type: "bar",
     data: {
-      labels: ["Fixed", "Uncontrolled", "Price-only", "CACCS Smart"],
+      labels: ["Fixed-rate tariff", "Charge immediately", "Cheapest hours only", "CACCS Smart Schedule"],
       datasets: [{
         data: [data.costs.fixed, data.costs.uncontrolled, data.costs.price_only, data.costs.smart],
         backgroundColor: ["rgba(107,114,128,.6)","rgba(239,68,68,.75)","rgba(245,158,11,.75)","rgba(22,163,74,.85)"],
@@ -1173,8 +1343,8 @@ const PANELS = {
       </div>
       <div class="dh">Today's NL market</div>
       <div class="d-stats">
-        <div class="d-stat"><div class="d-stat-v">≈€0.07</div><div class="d-stat-l">Valley 02–05h (wind)</div></div>
-        <div class="d-stat"><div class="d-stat-v">≈€0.48</div><div class="d-stat-l">Evening peak 17–20h</div></div>
+        <div class="d-stat"><div class="d-stat-v">from €0.07</div><div class="d-stat-l">Valley 02–05h (wind)</div></div>
+        <div class="d-stat"><div class="d-stat-v">up to €0.48</div><div class="d-stat-l">Evening peak 17–20h</div></div>
         <div class="d-stat"><div class="d-stat-v">7×</div><div class="d-stat-l">Peak-to-valley ratio</div></div>
         <div class="d-stat"><div class="d-stat-v">523</div><div class="d-stat-l">Negative-price hours 2025</div></div>
       </div>
@@ -1227,8 +1397,8 @@ const PANELS = {
           <span class="op">=</span> <span class="formula-result">€0.16 / kWh</span>
         </div>
         <div class="formula-vars">
-          <span><em>p</em><sub>retail</sub> avg retail rate ~€0.23/kWh 2027</span>
-          <span><em>p</em><sub>feed-in</sub> grid buy-back ~€0.07/kWh post-saldering</span>
+          <span><em>p</em><sub>retail</sub> avg retail rate €0.23/kWh 2027 est.</span>
+          <span><em>p</em><sub>feed-in</sub> grid buy-back €0.07/kWh post-saldering</span>
         </div>
       </div>
       <div class="dh">Matching rates — 4 kWp system</div>
@@ -1320,6 +1490,27 @@ function closePanel() {
   document.body.style.overflow = "";
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+
+/* ── MOBILE HAMBURGER MENU ── */
+(function(){
+  const btn = document.getElementById("hamburger");
+  const menu = document.getElementById("mobile-menu");
+  if (!btn || !menu) return;
+  function setOpen(open) {
+    menu.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", open);
+    menu.setAttribute("aria-hidden", !open);
+    btn.querySelector(".ham-open").style.display = open ? "none" : "block";
+    btn.querySelector(".ham-close").style.display = open ? "block" : "none";
+  }
+  btn.addEventListener("click", () => setOpen(!menu.classList.contains("open")));
+  window.closeMobileMenu = () => setOpen(false);
+  document.addEventListener("click", e => {
+    if (menu.classList.contains("open") && !btn.contains(e.target) && !menu.contains(e.target))
+      setOpen(false);
+  });
+  window.addEventListener("resize", () => { if (window.innerWidth > 768) setOpen(false); });
+})();
 </script>
 </body>
 </html>

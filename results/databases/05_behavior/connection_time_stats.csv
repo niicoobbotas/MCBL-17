@@ -1,0 +1,4 @@
+location,median_h,iqr_h,p5_h,p95_h
+Private,12.0,4.0,2.0,24.0
+Workplace,7.0,2.0,0.5,12.0
+Public,3.5,2.5,0.25,12.0

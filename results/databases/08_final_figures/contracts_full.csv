@@ -1,0 +1,11 @@
+supplier,contract,type,rate_eur_kwh,standing_eur_mo,notes,ev_annual_cost
+Eneco,HollandseWind & Zon Variabel,variable,0.293,6.95,"Indefinite term, quarterly adjustments",488.2271739130435
+Eneco,Stroom Vast 1 jaar,fixed-1y,0.319,6.95,12-mo lock; ~€60-150 cashback bonus,531.5510869565218
+Eneco,Stroom Vast 3 jaar,fixed-3y,0.348,6.95,36-mo lock,579.8739130434782
+Eneco,Dynamische Stroom,dynamic,0.24481648713570126,6.95,Hourly EPEX + €0.0235/kWh margin,407.9387769337283
+Eneco,Modelcontract,model,0.305,6.95,Standardised regulator-defined product,508.2228260869565
+Essent,Variabel,variable,0.269,7.1,"Q1-Q2 2026, quarterly adjustments",448.23586956521746
+Essent,Vast 1 jaar,fixed-1y,0.314,7.1,12-mo lock; cashback bonus,523.2195652173913
+Essent,Vast 3 jaar,fixed-3y,0.342,7.1,36-mo lock,569.8760869565218
+Essent,Dynamisch,dynamic,0.24300148713570127,7.1,Hourly EPEX + €0.0220/kWh margin,404.914434542424
+Essent,Modelcontract,model,0.301,7.1,Standardised regulator-defined product,501.55760869565216

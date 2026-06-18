@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EV Catalogue — SmartEV</title>
+  <title>EV Catalogue, SmartEV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -95,8 +95,6 @@
     .car-chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--bg3);color:var(--tm)}
     .car-chip.green{background:var(--accent-light);color:var(--accent)}
     .car-chip.blue{background:var(--accent2-light);color:var(--accent2)}
-    .car-price{font-size:13px;color:var(--td);margin-bottom:12px}
-    .car-price strong{color:var(--text);font-size:14px}
     .car-actions{display:flex;gap:8px}
     .car-detail-btn{flex:0 0 auto;background:var(--bg3);border:1px solid var(--border-b);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:12px;font-weight:600;color:var(--tm);cursor:pointer;transition:background .15s,color .15s;display:flex;align-items:center;gap:5px}
     .car-detail-btn:hover{background:var(--accent2-light);color:var(--accent2);border-color:var(--accent2)}
@@ -200,7 +198,7 @@
   <div class="page-hdr">
     <div class="page-badge">EV Catalogue 2025</div>
     <h1>20 Dutch top-selling electric vehicles</h1>
-    <p>Every model in our catalogue — with battery specs, WLTP range, and CACCS-compatible charging data. Click any car to see full details, charging times, and estimated smart-charging savings.</p>
+    <p>Every model in our catalogue, with battery specs, WLTP range, and CACCS-compatible charging data. Click any car to see full details, charging times, and estimated smart-charging savings.</p>
   </div>
 
   <div class="controls">
@@ -216,7 +214,6 @@
       <option value="battery">Sort: Largest battery</option>
       <option value="efficiency">Sort: Most efficient</option>
       <option value="power">Sort: AC power</option>
-      <option value="price">Sort: Lowest price</option>
     </select>
     <span class="count-label" id="count-label">Loading…</span>
   </div>
@@ -288,8 +285,13 @@ if (localStorage.getItem("token")) {
 
 /* ── Wikipedia image cache ── */
 const WIKI_TITLES = {
-  "Tesla Model Y":          "Tesla_Model_Y",
-  "Tesla Model 3":          "Tesla_Model_3",
+  "Tesla Model Y":                    "Tesla_Model_Y",
+  "Tesla Model Y Long Range":         "Tesla_Model_Y",
+  "Tesla Model Y Long Range AWD":     "Tesla_Model_Y",
+  "Tesla Model Y Performance":        "Tesla_Model_Y",
+  "Tesla Model 3":                    "Tesla_Model_3",
+  "Tesla Model 3 Long Range":         "Tesla_Model_3",
+  "Tesla Model 3 Performance":        "Tesla_Model_3",
   "Volkswagen ID.4":        "Volkswagen_ID.4",
   "Volkswagen ID.3":        "Volkswagen_ID.3",
   "Skoda Enyaq":            "%C5%A0koda_Enyaq",
@@ -314,7 +316,9 @@ const _imgCache = {};
 async function fetchCarImage(modelName) {
   if (_imgCache[modelName] !== undefined) return _imgCache[modelName];
   try {
-    const title = WIKI_TITLES[modelName] || encodeURIComponent(modelName.replace(/ /g,"_"));
+    const title = WIKI_TITLES[modelName]
+      || Object.entries(WIKI_TITLES).find(([k]) => modelName.startsWith(k))?.[1]
+      || encodeURIComponent(modelName.replace(/ /g,"_"));
     const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`,
       { signal: AbortSignal.timeout(5000) });
     if (!r.ok) { _imgCache[modelName] = ""; return ""; }
@@ -329,16 +333,16 @@ const CAR_DESCRIPTIONS = {
   "Tesla Model Y":         "The best-selling EV in the Netherlands. The Model Y Performance variant can accelerate 0–100 km/h in 3.7 s and features Tesla's proprietary Supercharger network for rapid DC top-ups on the road.",
   "Tesla Model 3":         "Tesla's compact executive saloon delivers a premium interior, over-the-air software updates, and access to the world's largest fast-charging network. Frequently cited for the lowest real-world energy consumption in its class.",
   "Volkswagen ID.4":       "Volkswagen's mid-size SUV on the MEB electric platform. Well-balanced range and practicality made it one of Europe's top-selling EVs. Supports CCS DC charging at up to 135 kW.",
-  "Volkswagen ID.3":       "The car that kicked off VW's electric era — a compact hatchback sized like a Golf but with more interior space. Very popular in city fleets across the Netherlands.",
+  "Volkswagen ID.3":       "The car that kicked off VW's electric era, a compact hatchback sized like a Golf but with more interior space. Very popular in city fleets across the Netherlands.",
   "Skoda Enyaq":           "Built on the same MEB platform as the ID.4 but with more passenger space and a premium feel at a lower price. Czech engineering and Skoda's practical design philosophy shine here.",
   "Audi Q4 e-tron":        "Premium compact SUV with near-silent interior and Audi's Virtual Cockpit. Shares its platform with the ID.4 but adds Audi-level refinement. Qualifies for ERE certificate programs in NL.",
   "BMW iX1":               "BMW's entry-level electric SAV uses a 5th-generation eDrive system offering a well-balanced blend of efficiency, handling, and interior quality typical of the BMW brand.",
   "BMW iX3":               "The iX3 packs BMW performance in a practical mid-size SUV. Its 80 kWh battery and up to 286 hp make it a compelling option for drivers covering long daily distances.",
-  "Peugeot e-208":         "Award-winning urban EV. The Peugeot e-208 won the Car of the Year title for good reason — sharp styling, a 3D instrument cluster, and city-optimised efficiency in a supermini package.",
+  "Peugeot e-208":         "Award-winning urban EV. The Peugeot e-208 won the Car of the Year title for good reason, sharp styling, a 3D instrument cluster, and city-optimised efficiency in a supermini package.",
   "Peugeot e-2008":        "The SUV sibling to the e-208 adds more luggage space and a higher seating position while keeping the same efficient powertrain. Popular for young families in the Netherlands.",
   "Renault Zoe":           "One of Europe's most popular EVs by total sales volume. The Zoe is optimised for urban use with excellent energy recovery in stop-start traffic. Supports optional CHP battery replacement.",
   "Renault Megane E-Tech": "Renault's modern EV platform delivers a low-slung, stylish design with up to 300 km WLTP range and 130 kW DC charging capability.",
-  "Hyundai Ioniq 5":       "Winner of multiple international Car of the Year awards, the Ioniq 5 features 800V architecture for ultra-rapid 220 kW charging — charging from 10–80% in under 18 minutes.",
+  "Hyundai Ioniq 5":       "Winner of multiple international Car of the Year awards, the Ioniq 5 features 800V architecture for ultra-rapid 220 kW charging, charging from 10–80% in under 18 minutes.",
   "Hyundai Ioniq 6":       "Hyundai's aerodynamic saloon achieves one of the best drag coefficients of any production EV (Cd 0.21), boosting real-world range. Also supports 800V charging.",
   "Kia EV6":               "Kia's GT-Line Award winner. Built on the same 800V E-GMP platform as the Ioniq 5 and praised for its GT performance version producing 577 hp in AWD configuration.",
   "Kia Niro EV":           "A practical crossover-style EV with generous standard specification and a focus on comfort over outright performance. Great choice for mixed urban and motorway driving.",
@@ -405,7 +409,6 @@ function filterCars() {
     battery:    (a,b) => b.battery_kwh - a.battery_kwh,
     efficiency: (a,b) => a.efficiency_kwh_100km - b.efficiency_kwh_100km,
     power:      (a,b) => b.ac_power_kw - a.ac_power_kw,
-    price:      (a,b) => a.price_eur - b.price_eur,
   };
   cars.sort(sortFns[sort]);
 
@@ -439,6 +442,8 @@ function renderCars(cars) {
     const rangeChip = c.wltp_km >= 600
       ? `<span class="car-chip green">600+ km</span>`
       : c.wltp_km >= 500 ? `<span class="car-chip blue">500+ km</span>` : ``;
+    const v2lChip = ["Hyundai Ioniq 5", "Hyundai Ioniq 6", "Kia EV6"].some(m => c.model_name.startsWith(m))
+      ? `<span class="car-chip blue">V2L</span>` : "";
 
     const safeJson = JSON.stringify(c).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 
@@ -468,8 +473,7 @@ function renderCars(cars) {
           <div class="car-stat"><div class="car-stat-v">${c.efficiency_kwh_100km}</div><div class="car-stat-l">kWh/100 km</div></div>
           <div class="car-stat"><div class="car-stat-v">${c.ac_power_kw}</div><div class="car-stat-l">kW AC max</div></div>
         </div>
-        <div class="car-features">${powerChip}${rangeChip}</div>
-        <div class="car-price">From <strong>€${c.price_eur ? c.price_eur.toLocaleString('nl-NL') : '–'}</strong></div>
+        <div class="car-features">${powerChip}${rangeChip}${v2lChip}</div>
         <div class="car-actions">
           <button class="car-detail-btn" onclick="event.stopPropagation();openPanel(${c.id})">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -544,6 +548,12 @@ async function openPanel(carId) {
   else if (c.efficiency_kwh_100km <= 17) chips.push('<span class="dp-chip blue">Efficiency A</span>');
   chips.push('<span class="dp-chip">CCS DC compatible</span>');
   chips.push('<span class="dp-chip">CACCS compatible</span>');
+  // V2L / Bidirectional charging
+  const V2L_MODELS = ["Hyundai Ioniq 5", "Hyundai Ioniq 6", "Kia EV6"];
+  if (V2L_MODELS.some(m => c.model_name.startsWith(m))) {
+    chips.push('<span class="dp-chip blue">V2L ready</span>');
+    chips.push('<span class="dp-chip">Vehicle-to-Load</span>');
+  }
   document.getElementById("dp-chips").innerHTML = chips.join("");
 
   // Charging time table
@@ -584,7 +594,7 @@ async function openPanel(carId) {
     document.getElementById("dp-cta").innerHTML = `
       <a href="/register" class="dp-cta-login">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        Register — it's free
+        Register, it's free
       </a>
       <a href="/login" class="dp-cta-login" style="flex:.5">Sign in</a>`;
   }
@@ -643,7 +653,7 @@ async function addToGarage(btn, carId) {
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>In garage`;
     showToast(`${c.model_name} added to your garage`);
   } catch {
-    showToast("Could not add vehicle — please try again");
+    showToast("Could not add vehicle. Please try again.");
   }
   btn.disabled = false;
 }
@@ -680,7 +690,7 @@ async function addToGarageFromPanel(carId) {
     }
     showToast(`${c.model_name} added to your garage`);
   } catch {
-    showToast("Could not add vehicle — please try again");
+    showToast("Could not add vehicle. Please try again.");
     if (btn) btn.disabled = false;
   }
 }

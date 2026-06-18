@@ -6,7 +6,7 @@ import os, json, datetime
 from typing import List, Optional
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -73,6 +73,12 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
+
+# ── Pi script download ─────────────────────────────────────────────────────────
+@app.get("/download/charger_sim.py")
+def download_charger_sim():
+    p = Path(__file__).parent.parent.parent / "raspberry_pi" / "charger_sim.py"
+    return FileResponse(p, filename="charger_sim.py", media_type="text/plain")
 
 # ── Auth Routes ────────────────────────────────────────────────────────────────
 
@@ -231,6 +237,39 @@ def today_prices(
 def public_prices(supplier: str = "eneco"):
     """No auth — used by landing page calculator."""
     return {"prices": caccs.get_today_hourly(supplier)}
+
+
+@app.get("/api/prices/forecast")
+def prices_forecast(days: int = 3, supplier: str = "eneco"):
+    """Return live_prices/*.json data for today + next N days."""
+    import datetime, json
+    from pathlib import Path
+    live_dir = Path(__file__).parent / "live_prices"
+    margin = caccs.SUPPLIERS[supplier]["dyn_margin"]
+    today = datetime.date.today()
+    result = []
+    for offset in range(days + 1):
+        date = today + datetime.timedelta(days=offset)
+        data = None
+        for suffix in ("", "_forecast"):
+            p = live_dir / f"{date.isoformat()}{suffix}.json"
+            if p.exists():
+                try:
+                    data = json.loads(p.read_text())
+                    break
+                except Exception:
+                    pass
+        if data:
+            wholesale = data["prices_eur_mwh"]
+            retail = [round(caccs.retail(w, margin), 4) for w in wholesale]
+            result.append({
+                "date": date.isoformat(),
+                "is_forecast": data.get("is_forecast", False),
+                "source": data.get("source", "unknown"),
+                "prices_eur_mwh": wholesale,
+                "prices_eur_kwh": retail,
+            })
+    return {"days": result}
 
 
 # ── CACCS Algorithm Routes ─────────────────────────────────────────────────────
@@ -545,6 +584,71 @@ def serve_privacy():
 @app.get("/terms", response_class=HTMLResponse)
 def serve_terms():
     return FileResponse(str(FRONTEND_DIR / "terms.html"))
+
+
+# ── Raspberry Pi PoC WebSocket relay ─────────────────────────────────────────
+# One Pi connects to /ws/pi; dashboard browsers connect to /ws/dashboard.
+# The backend relays messages both ways so the Pi and dashboard talk to each
+# other without needing to be on the same network segment.
+
+_pi_ws: Optional[WebSocket] = None
+_dash_sockets: list[WebSocket] = []
+
+
+async def _broadcast_dash(msg: dict) -> None:
+    dead = []
+    for ws in list(_dash_sockets):
+        try:
+            await ws.send_json(msg)
+        except Exception:
+            dead.append(ws)
+    for ws in dead:
+        if ws in _dash_sockets:
+            _dash_sockets.remove(ws)
+
+
+@app.websocket("/ws/pi")
+async def ws_pi(ws: WebSocket):
+    global _pi_ws
+    await ws.accept()
+    _pi_ws = ws
+    await _broadcast_dash({"type": "pi_connected"})
+    print("RPi connected")
+    try:
+        async for msg in ws.iter_json():
+            await _broadcast_dash(msg)
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        print(f"Pi WS error: {exc}")
+    finally:
+        if _pi_ws is ws:
+            _pi_ws = None
+        await _broadcast_dash({"type": "pi_disconnected"})
+        print("RPi disconnected")
+
+
+@app.websocket("/ws/dashboard")
+async def ws_dashboard(ws: WebSocket):
+    await ws.accept()
+    _dash_sockets.append(ws)
+    # Tell the new browser tab the current Pi connection status
+    await ws.send_json({"type": "pi_status", "connected": _pi_ws is not None})
+    try:
+        async for msg in ws.iter_json():
+            # Relay any command to the Pi
+            if _pi_ws:
+                try:
+                    await _pi_ws.send_json(msg)
+                except Exception:
+                    pass
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        print(f"Dashboard WS error: {exc}")
+    finally:
+        if ws in _dash_sockets:
+            _dash_sockets.remove(ws)
 
 
 if __name__ == "__main__":

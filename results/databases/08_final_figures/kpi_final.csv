@@ -1,0 +1,17 @@
+,0
+n_drivers,1000.0
+mean_cost_unc,418.67368449199324
+mean_cost_po,364.75423520538885
+mean_cost_sm,372.9871292899268
+median_cost_unc,408.90892936848246
+median_cost_po,361.0611450476739
+median_cost_sm,368.6917842061797
+mean_save_po_eur,53.91944928660438
+mean_save_sm_eur,45.68655520206637
+median_save_sm_eur,43.69850206524583
+mean_save_po_pct,12.50462328028139
+mean_save_sm_pct,10.436266480042836
+mean_peak_kwh_unc,756.281942789051
+mean_peak_kwh_sm,185.94188388275595
+mean_peak_drop_pct,54.304818433539076
+share_drivers_save,86.7

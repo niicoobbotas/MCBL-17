@@ -1,0 +1,16 @@
+,0
+n_drivers,1000.0
+n_solar_households,406.0
+mean_cost_fix,518.0894919703197
+mean_cost_unc,418.56654406209566
+mean_cost_sm,372.6178629593119
+mean_cost_sm_ext,359.2377171979412
+mean_ere_revenue_ext,137.90482086190863
+mean_solar_value,15.468652916921092
+mean_total_value_baseline,269.16783233041014
+mean_total_value_extended,312.22524855120827
+mean_total_value_solar_households,360.2979758981837
+mean_total_value_nonsolar_households,279.3674584790331
+mean_sc_kwh_solar_households,153.01257163551833
+mean_peak_drop_baseline_pct,66.36671751166742
+mean_peak_drop_extended_pct,65.44857599209887

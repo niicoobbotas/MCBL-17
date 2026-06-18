@@ -1,0 +1,13 @@
+,0
+n_drivers,1000.0
+mean_cost_fix_EUR,518.7273461108472
+mean_cost_unc_EUR,418.67368449199324
+mean_cost_po_EUR,364.75423520538885
+mean_cost_sm_EUR,372.9871292899268
+median_cost_sm_EUR,368.6917842061797
+mean_save_sm_vs_fix_pct,28.17867192862026
+mean_save_sm_vs_unc_pct,10.436266480042836
+share_drivers_save_vs_fix,0.999
+share_drivers_save_vs_unc,0.867
+mean_peak_drop_pct,54.304818433539076
+mean_annual_km,10781.657367683083
